@@ -1,0 +1,109 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: tiktendry-backend
+    restart: unless-stopped
+    env_file:
+      - ./Backend/.env
+    environment:
+      - TZ=America/Lima
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    volumes:
+      - ./Backend/src/uploads:/app/src/uploads
+    networks:
+      - tiktendry-net
+
+  db:
+    image: mysql:8.0
+    container_name: tiktendry-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tiktendry
+      MYSQL_USER: tiktendry
+      MYSQL_PASSWORD: tiktendry
+      TZ: America/Lima
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - tiktendry-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: tiktendry-frontend
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - tiktendry-net
+
+  factura-php:
+    build:
+      context: ./Factura
+      dockerfile: Dockerfile
+    container_name: tiktendry-factura-php
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+      - APP_NAME=TikTrendyFacturador
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_TIMEZONE=America/Lima
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=tiktendry
+      - DB_USERNAME=tiktendry
+      - DB_PASSWORD=tiktendry
+      - LOG_LEVEL=error
+      - SESSION_DRIVER=database
+      - CACHE_STORE=database
+      - QUEUE_CONNECTION=database
+    volumes:
+      - ./Factura:/var/www/html
+      - ./Backend/src/uploads/certs:/var/www/html/src/uploads/certs
+      - ./Backend/src/uploads/logos:/var/www/html/src/uploads/logos
+    depends_on:
+      - db
+    networks:
+      - tiktendry-net
+
+  factura-nginx:
+    build:
+      context: ./Factura
+      dockerfile: Dockerfile.nginx
+    container_name: tiktendry-factura-nginx
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+    ports:
+      - "8000:80"
+    depends_on:
+      - factura-php
+    volumes:
+      - ./Factura:/var/www/html
+      - ./Backend/src/uploads/certs:/var/www/html/src/uploads/certs
+      - ./Backend/src/uploads/logos:/var/www/html/src/uploads/logos
+    networks:
+      - tiktendry-net
+
+volumes:
+  db_data:
+
+networks:
+  tiktendry-net:
+    driver: bridge

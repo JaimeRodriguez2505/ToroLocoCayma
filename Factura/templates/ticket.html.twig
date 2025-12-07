@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Forzar tamaño de página y márgenes -->
+  <style>
+  /* RESET COMPLETO PARA IMPRESORAS TÉRMICAS */
+  @page {
+    size: 80mm auto;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ESTILOS PRINCIPALES CON MÁRGEN AUMENTADO IZQUIERDO */
+  body {
+    width: 76mm !important;       /* Reducción de 4mm para margen físico */
+    max-width: 76mm !important;
+    margin: 0 0 0 6mm !important; /* Aumentamos compensación izquierda a 6mm */
+    padding: 1mm 2mm 1mm 0 !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative;
+    left: 2mm !important;       /* Aumentamos ajuste fino */
+  }
+
+  /* CLASES UTILITARIAS */
+  .center { 
+    text-align: center !important;
+    padding-left: 0 !important;
+  }
+  .right { 
+    text-align: right !important;
+    padding-right: 1mm !important;
+  }
+  .bold { 
+    font-weight: bold !important; 
+  }
+  .dashed { 
+    border-top: 1px dashed #000 !important;
+    margin: 3px 0 !important;
+  }
+
+  /* TABLAS PRINCIPALES */
+  table {
+    width: 72mm !important;       /* 76mm - 4mm compensación */
+    max-width: 72mm !important;
+    margin-left: -1.5mm !important; /* Mayor compensación */
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+
+  td {
+    padding: 2px 0 2px 2.5mm !important; /* Sangría izquierda aumentada */
+    vertical-align: top !important;
+    word-break: break-word !important;
+  }
+
+  /* CABECERA */
+  .header img {
+    max-height: 45px !important;
+    display: block !important;
+    margin: 0 auto 3px auto !important;
+  }
+
+  /* TABLA DE DETALLES CON MÁRGEN EXTRA */
+  .detalle-table {
+    width: 72mm !important;
+    margin-left: -1mm !important;
+  }
+
+  .detalle-table thead td {
+    padding-bottom: 3px !important;
+  }
+
+  /* COLUMNAS CON PROTECCIÓN EXTRA IZQUIERDA */
+  .col-cant {
+    width: 14% !important;
+    text-align: left !important;
+    padding-left: 3.5mm !important; /* Aumentamos protección izquierda */
+    min-width: 10mm !important;
+  }
+
+  .col-desc {
+    width: 56% !important;
+    text-align: left !important;
+    padding-left: 1.5mm !important;
+    hyphens: auto !important;
+  }
+
+  .col-total {
+    width: 20% !important;
+    text-align: right !important;
+    padding-right: 1mm !important;
+  }
+
+  /* QR AJUSTADO */
+  .qr {
+    width: 68mm !important;
+    margin: 5px auto !important;
+  }
+
+  .qr img {
+    width: 70px !important;
+    height: 70px !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  /* PIE DE PÁGINA */
+  .footer-note {
+    font-size: 9px !important;
+    margin-top: 3px !important;
+    padding-left: 0 !important;
+  }
+
+  /* MEDIA PRINT (AJUSTES FINALES CON MÁRGEN EXTRA) */
+  @media print {
+    body {
+      width: 76mm !important;
+      margin-left: 8mm !important; /* MÁRGEN IZQUIERDO AUMENTADO A 8mm */
+      padding-right: 1mm !important;
+      left: 0 !important;
+    }
+
+    table, .detalle-table {
+      width: 70mm !important;     /* Reducción final para impresión */
+      margin-left: 0 !important;
+    }
+
+    .col-cant {
+      padding-left: 4mm !important; /* Máxima protección izquierda */
+    }
+
+    /* FUERZA SALTO DE LÍNEA EN DESCRIPCIONES */
+    .col-desc {
+      overflow-wrap: anywhere !important;
+      hyphens: manual !important;
+    }
+
+    /* GARANTIZAR VISIBILIDAD DE BORDES */
+    td {
+      padding-left: 3mm !important; /* Aumentamos padding izquierdo */
+    }
+  }
+</style>
+</head>
+<body>
+  {% set name = doc.tipoDoc|catalog('01') %}
+
+  <!-- HEADER -->
+  <table class="header">
+    <tr><td class="center bold">{{ doc.company.razonSocial|upper }}</td></tr>
+    <tr><td class="center">RUC {{ doc.company.ruc }}</td></tr>
+    <tr><td class="center">{{ doc.company.address.direccion }}</td></tr>
+    <tr><td class="center">{{ doc.company.address.ubigeo|default('') }}</td></tr>
+    {% if params.system.logo %}
+      <tr>
+        <td class="center">
+          <img src="{{ params.system.logo|image_b64 }}" alt="logo">
+        </td>
+      </tr>
+    {% endif %}
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- DATOS DEL DOCUMENTO -->
+  <table>
+    <tr><td class="center bold">{{ name }} ELECTRÓNICA</td></tr>
+    <tr><td class="center bold">{{ doc.serie }}-{{ '%08d'|format(doc.correlativo) }}</td></tr>
+    <tr><td class="dashed"></td></tr>
+    <tr><td><strong>Cliente:</strong> {{ doc.client.rznSocial }}</td></tr>
+    <tr><td><strong>{{ doc.client.tipoDoc|catalog('06') }}:</strong> {{ doc.client.numDoc }}</td></tr>
+    <tr><td><strong>Dir. Cliente:</strong> {{ doc.client.address.direccion|default('-') }}</td></tr>
+    <tr><td><strong>Emisión:</strong> {{ doc.fechaEmision|date('Y-m-d H:i:s', 'America/Lima') }}</td></tr>
+    <tr><td><strong>Moneda:</strong> {{ doc.tipoMoneda|catalog('021') }}</td></tr>
+    <tr><td><strong>Pago:</strong> {{ doc.formaPago.tipo }}</td></tr>
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- DETALLE CON ESPACIADO MEJORADO -->
+  <table class="detalle-table">
+    <thead>
+      <tr>
+        <td class="bold col-cant">Cant</td>
+        <td class="bold col-desc">Descripción</td>
+        <td class="bold col-total">Total</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for det in doc.details %}
+      <tr>
+        <td class="col-cant">{{ det.cantidad|n_format }}</td>
+        <td class="col-desc">{{ det.descripcion }}</td>
+        <td class="col-total">{{ (det.mtoValorVenta + det.totalImpuestos)|n_format }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- TOTALES -->
+  <table>
+    {% if doc.subTotal %}
+      <tr>
+        <td>Subtotal:</td>
+        <td class="right">{{ doc.subTotal|n_format }}</td>
+      </tr>
+    {% endif %}
+    {% if doc.mtoOperGravadas %}
+      <tr>
+        <td>Op. Gravada:</td>
+        <td class="right">{{ doc.mtoOperGravadas|n_format }}</td>
+      </tr>
+    {% endif %}
+    {% if doc.mtoIgv %}
+      <tr>
+        <td>IGV:</td>
+        <td class="right">{{ doc.mtoIgv|n_format }}</td>
+      </tr>
+    {% endif %}
+    {% if doc.descuentos and doc.descuentos|length > 0 %}
+      <tr>
+        <td>Descuento:</td>
+        <td class="right">-{{ doc.descuentos[0].monto|n_format }}</td>
+      </tr>
+    {% endif %}
+    <tr>
+      <td class="bold">Importe Total</td>
+      <td class="bold right">{{ doc.mtoImpVenta|n_format }}</td>
+    </tr>
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- PIE + QR CENTRADO Y MÁS GRANDE -->
+  <table class="footer">
+    <tr>
+      <td class="center">Representación impresa de la {{ name }} Electrónica.</td>
+    </tr>
+    <tr>
+      <td class="center">Generado por Tuki-Tuki Solutions S.A.C.</td>
+    </tr>
+  </table>
+
+  <div class="qr">
+    <img src="{{ qrCode(doc)|image_b64('svg+xml') }}" alt="Código QR">
+  </div>
+
+  <div class="dashed"></div>
+  <p class="center bold">¡Gracias por su preferencia!</p>
+
+</body>
+</html>

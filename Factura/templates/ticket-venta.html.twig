@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Forzar tamaño de página y márgenes -->
+  <style>
+  /* RESET COMPLETO PARA IMPRESORAS TÉRMICAS */
+  @page {
+    size: 80mm auto;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ESTILOS PRINCIPALES CON MÁRGEN AUMENTADO IZQUIERDO */
+  body {
+    width: 76mm !important;       /* Reducción de 4mm para margen físico */
+    max-width: 76mm !important;
+    margin: 0 0 0 6mm !important; /* Aumentamos compensación izquierda a 6mm */
+    padding: 1mm 2mm 1mm 0 !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative;
+    left: 2mm !important;       /* Aumentamos ajuste fino */
+  }
+
+  /* CLASES UTILITARIAS */
+  .center { 
+    text-align: center !important;
+    padding-left: 0 !important;
+  }
+  .right { 
+    text-align: right !important;
+    padding-right: 1mm !important;
+  }
+  .bold { 
+    font-weight: bold !important; 
+  }
+  .dashed { 
+    border-top: 1px dashed #000 !important;
+    margin: 3px 0 !important;
+  }
+
+  /* TABLAS PRINCIPALES */
+  table {
+    width: 72mm !important;       /* 76mm - 4mm compensación */
+    max-width: 72mm !important;
+    margin-left: -1.5mm !important; /* Mayor compensación */
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+  }
+
+  td {
+    padding: 2px 0 2px 2.5mm !important; /* Sangría izquierda aumentada */
+    vertical-align: top !important;
+    word-break: break-word !important;
+  }
+
+  /* CABECERA */
+  .header img {
+    max-height: 45px !important;
+    display: block !important;
+    margin: 0 auto 3px auto !important;
+  }
+
+  /* TABLA DE DETALLES CON MÁRGEN EXTRA */
+  .detalle-table {
+    width: 72mm !important;
+    margin-left: -1mm !important;
+  }
+
+  .detalle-table thead td {
+    padding-bottom: 3px !important;
+  }
+
+  /* COLUMNAS CON PROTECCIÓN EXTRA IZQUIERDA */
+  .col-cant {
+    width: 14% !important;
+    text-align: left !important;
+    padding-left: 3.5mm !important; /* Aumentamos protección izquierda */
+    min-width: 10mm !important;
+  }
+
+  .col-desc {
+    width: 56% !important;
+    text-align: left !important;
+    padding-left: 1.5mm !important;
+    hyphens: auto !important;
+  }
+
+  .col-total {
+    width: 20% !important;
+    text-align: right !important;
+    padding-right: 1mm !important;
+  }
+
+  /* QR AJUSTADO */
+  .qr {
+    width: 68mm !important;
+    margin: 5px auto !important;
+  }
+
+  .qr img {
+    width: 70px !important;
+    height: 70px !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  /* PIE DE PÁGINA */
+  .footer-note {
+    font-size: 9px !important;
+    margin-top: 3px !important;
+    padding-left: 0 !important;
+  }
+
+  /* MEDIA PRINT (AJUSTES FINALES CON MÁRGEN EXTRA) */
+  @media print {
+    body {
+      width: 76mm !important;
+      margin-left: 8mm !important; /* MÁRGEN IZQUIERDO AUMENTADO A 8mm */
+      padding-right: 1mm !important;
+      left: 0 !important;
+    }
+
+    table, .detalle-table {
+      width: 70mm !important;     /* Reducción final para impresión */
+      margin-left: 0 !important;
+    }
+
+    .col-cant {
+      padding-left: 4mm !important; /* Máxima protección izquierda */
+    }
+
+    /* FUERZA SALTO DE LÍNEA EN DESCRIPCIONES */
+    .col-desc {
+      overflow-wrap: anywhere !important;
+      hyphens: manual !important;
+    }
+
+    /* GARANTIZAR VISIBILIDAD DE BORDES */
+    td {
+      padding-left: 3mm !important; /* Aumentamos padding izquierdo */
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- HEADER -->
+  <table class="header">
+    <tr><td class="center bold">{{ empresa.razonSocial|upper }}</td></tr>
+    <tr><td class="center">RUC {{ empresa.ruc }}</td></tr>
+    <tr><td class="center">{{ empresa.direccion }}</td></tr>
+    {% if empresa.telefono %}
+      <tr><td class="center">Tel: {{ empresa.telefono }}</td></tr>
+    {% endif %}
+    {% if params.system.logo %}
+      <tr>
+        <td class="center">
+          <img src="{{ params.system.logo|image_b64 }}" alt="logo">
+        </td>
+      </tr>
+    {% endif %}
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- DATOS DEL DOCUMENTO -->
+  <table>
+    <tr><td class="center bold">TICKET DE VENTA</td></tr>
+    <tr><td class="center bold"># {{ '%08d'|format(venta.id) }}</td></tr>
+    <tr><td class="dashed"></td></tr>
+    <tr><td><strong>Fecha:</strong> {{ venta.fecha|date('Y-m-d H:i:s', 'America/Lima') }}</td></tr>
+    <tr><td><strong>Método:</strong> {{ venta.metodo_pago|capitalize }}</td></tr>
+    {% if venta.observaciones %}
+      <tr><td><strong>Observaciones:</strong> {{ venta.observaciones }}</td></tr>
+    {% endif %}
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- DETALLE CON ESPACIADO MEJORADO -->
+  <table class="detalle-table">
+    <thead>
+      <tr>
+        <td class="bold col-cant">Cant</td>
+        <td class="bold col-desc">Descripción</td>
+        <td class="bold col-total">Total</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for detalle in detalles %}
+      <tr>
+        <td class="col-cant">{{ detalle.cantidad|n_format }}</td>
+        <td class="col-desc">{{ detalle.descripcion }}</td>
+        <td class="col-total">{{ detalle.subtotal|n_format }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- TOTALES -->
+  <table>
+    <tr>
+      <td>Subtotal:</td>
+      <td class="right">{{ totales.subtotal|n_format }}</td>
+    </tr>
+    <tr>
+      <td>IGV:</td>
+      <td class="right">{{ totales.igv|n_format }}</td>
+    </tr>
+    {% if totales.descuento > 0 %}
+      <tr>
+        <td>Descuento:</td>
+        <td class="right">-{{ totales.descuento|n_format }}</td>
+      </tr>
+    {% endif %}
+    <tr>
+      <td class="bold">Importe Total</td>
+      <td class="bold right">{{ totales.total|n_format }}</td>
+    </tr>
+  </table>
+
+  <div class="dashed"></div>
+
+  <!-- PIE -->
+  <table class="footer">
+    <tr>
+      <td class="center">*** TICKET DE VENTA ***</td>
+    </tr>
+    <tr>
+      <td class="center">No válido como comprobante de pago</td>
+    </tr>
+    <tr>
+      <td class="center">Generado por Tuki-Tuki Solutions S.A.C.</td>
+    </tr>
+  </table>
+
+  <div class="dashed"></div>
+  <p class="center bold">¡Gracias por su compra!</p>
+
+</body>
+</html>
