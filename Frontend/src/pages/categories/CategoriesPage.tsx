@@ -258,7 +258,7 @@ const CategoriesPage = () => {
           transition={{ duration: 0.5 }}
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-fire-600 to-ember-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white">
               Categorías
             </h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">Gestiona las categorías de tus productos</p>

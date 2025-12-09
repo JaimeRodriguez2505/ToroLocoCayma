@@ -343,7 +343,7 @@ const DashboardPage = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-white dark:via-gray-200 dark:to-gray-400 text-transparent bg-clip-text">
+          <h1 className="text-4xl font-bold tracking-tight text-fire-700 dark:text-white">
             Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">Bienvenido al panel de control de Toro Loco Cayma</p>
@@ -854,7 +854,7 @@ const DashboardPage = () => {
               className="space-y-6"
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 dark:from-white dark:via-gray-200 dark:to-gray-400 text-transparent bg-clip-text">
+                <h2 className="text-2xl font-bold text-fire-700 dark:text-white">
                   Estadísticas y Tendencias Mensuales
                 </h2>
               </div>

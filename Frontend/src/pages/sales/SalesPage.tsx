@@ -503,7 +503,7 @@ const SalesPage = () => {
         >
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-toro-red via-red-600 to-red-700 dark:from-toro-red dark:via-red-600 dark:to-red-700 bg-clip-text text-transparent flex items-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white flex items-center">
                 <ShoppingCart className="mr-3 h-7 w-7 text-toro-red dark:text-toro-red" />
                 Ventas
               </h1>
@@ -520,12 +520,12 @@ const SalesPage = () => {
                         disabled={!isWithinBusinessHours}
                       >
                         {isWithinBusinessHours ? (
-                          <Link to="/sales/new">
+                          <Link to="/sales/new" className="flex items-center text-white">
                             <Plus className="mr-2 h-4 w-4" />
                             Nueva Venta
                           </Link>
                         ) : (
-                          <span className="flex items-center">
+                          <span className="flex items-center text-white">
                             <Clock className="mr-2 h-4 w-4" />
                             Nueva Venta
                           </span>

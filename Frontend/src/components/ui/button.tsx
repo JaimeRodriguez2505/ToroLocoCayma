@@ -125,22 +125,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       )
     }
 
+    // Clonar el icono con las clases de tamaño aplicadas
+    const renderIcon = (iconElement: React.ReactNode) => {
+      if (!iconElement) return null
+      if (React.isValidElement(iconElement)) {
+        return React.cloneElement(iconElement as React.ReactElement<any>, {
+          className: cn(
+            iconSize,
+            "flex-shrink-0 inline-block align-middle",
+            (iconElement.props as any).className
+          )
+        })
+      }
+      return iconElement
+    }
+
     return (
       <motion.button
-        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        className={cn(
+          buttonVariants({ variant, size, fullWidth, className }),
+          "flex-row" // Asegurar dirección horizontal explícita
+        )}
         ref={ref}
         disabled={isDisabled}
         {...animationProps}
         {...(props as any)}
       >
-        {loading && <Loader2 className={cn(iconSize, "animate-spin")} />}
-        {!loading && icon && iconPosition === 'left' && (
-          <span className={cn("flex-shrink-0", iconSize)}>{icon}</span>
+        {loading && <Loader2 className={cn(iconSize, "animate-spin flex-shrink-0")} />}
+        {!loading && icon && iconPosition === 'left' && renderIcon(icon)}
+        {children && (
+          <span className="inline-flex items-center leading-none">{children}</span>
         )}
-        <span className={cn(!icon && !loading && "flex-1", "truncate")}>{children}</span>
-        {!loading && icon && iconPosition === 'right' && (
-          <span className={cn("flex-shrink-0", iconSize)}>{icon}</span>
-        )}
+        {!loading && icon && iconPosition === 'right' && renderIcon(icon)}
       </motion.button>
     )
   }

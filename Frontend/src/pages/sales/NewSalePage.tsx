@@ -3941,11 +3941,11 @@ const NewSalePage = () => {
                   <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 ruby-neon-icon" />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-lg sm:text-xl font-bold ruby-neon-text">Nueva Venta</h1>
-                  <p className="text-white/70 text-xs sm:text-sm font-medium">Sistema Toro Loco Cayma POS</p>
+                  <h1 className="text-lg sm:text-xl font-bold text-white dark:text-white">Nueva Venta</h1>
+                  <p className="text-white/90 dark:text-white/70 text-xs sm:text-sm font-medium">Sistema Toro Loco Cayma POS</p>
                 </div>
                 <div className="sm:hidden">
-                  <h1 className="text-base font-bold ruby-neon-text">Nueva Venta</h1>
+                  <h1 className="text-base font-bold text-white dark:text-white">Nueva Venta</h1>
                 </div>
               </div>
 
@@ -3955,17 +3955,17 @@ const NewSalePage = () => {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className={`flex items-center px-3 py-1.5 rounded-lg ${isScanning
-                    ? "bg-emerald-500/20 border border-emerald-400/30"
-                    : "bg-blue-500/20 border border-blue-400/30"
+                    ? "bg-emerald-500/20 dark:bg-emerald-500/20 border border-emerald-400/30 dark:border-emerald-400/30"
+                    : "bg-blue-500/20 dark:bg-blue-500/20 border border-blue-400/30 dark:border-blue-400/30"
                     }`}
                 >
-                  <Barcode className={`h-4 w-4 mr-2 ${isScanning ? "text-emerald-300" : "text-blue-300"}`} />
+                  <Barcode className={`h-4 w-4 mr-2 ${isScanning ? "text-emerald-900 dark:text-emerald-300" : "text-blue-900 dark:text-blue-300"}`} />
                   <div>
-                    <p className={`text-sm font-medium ${isScanning ? "text-emerald-200" : "text-blue-200"}`}>
+                    <p className={`text-sm font-medium ${isScanning ? "text-emerald-900 dark:text-emerald-200" : "text-blue-900 dark:text-blue-200"}`}>
                       {isScanning ? "¡Código escaneado!" : "Escáner activo"}
                     </p>
                     {isScanning && (
-                      <p className="text-xs text-white/60 font-mono">
+                      <p className="text-xs text-gray-800 dark:text-white/60 font-mono">
                         {scannedBarcode}
                       </p>
                     )}
@@ -3976,11 +3976,11 @@ const NewSalePage = () => {
 
             {/* Sección derecha */}
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <Badge variant="secondary" className="bg-white/10 text-white border-white/20 hover:bg-white/20 text-xs hidden sm:flex">
+              <Badge variant="secondary" className="bg-white/10 dark:bg-white/10 text-white dark:text-white border-white/20 dark:border-white/20 hover:bg-white/20 dark:hover:bg-white/20 text-xs hidden sm:flex">
                 <Clock className="h-3 w-3 mr-1" />
                 {new Date().toLocaleDateString()}
               </Badge>
-              <Badge variant="secondary" className="bg-white/10 text-white border-white/20 hover:bg-white/20 text-xs">
+              <Badge variant="secondary" className="bg-white/10 dark:bg-white/10 text-white dark:text-white border-white/20 dark:border-white/20 hover:bg-white/20 dark:hover:bg-white/20 text-xs">
                 <Package className="h-3 w-3 mr-1" />
                 {totalItems}
               </Badge>
@@ -3989,7 +3989,7 @@ const NewSalePage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsShortcutsDialogOpen(true)}
-                className="text-white/80 hover:text-white hover:bg-white/10 h-8 hidden sm:flex"
+                className="text-white dark:text-white/80 hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 h-8 hidden sm:flex"
               >
                 <Keyboard className="h-3.5 w-3.5 mr-1.5" />
                 <span className="hidden md:inline">Atajos</span>
@@ -3999,7 +3999,7 @@ const NewSalePage = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsBarcodeScannerActive(!isBarcodeScannerActive)}
-                className={`text-white/80 hover:text-white hover:bg-white/10 h-8 ${isBarcodeScannerActive ? 'bg-white/10' : ''}`}
+                className={`text-white dark:text-white/80 hover:text-white dark:hover:text-white hover:bg-white/10 dark:hover:bg-white/10 h-8 ${isBarcodeScannerActive ? 'bg-white/10' : ''}`}
               >
                 <Barcode className="h-3.5 w-3.5 sm:mr-1.5" />
                 <span className="hidden sm:inline font-medium">{isBarcodeScannerActive ? 'ON' : 'OFF'}</span>

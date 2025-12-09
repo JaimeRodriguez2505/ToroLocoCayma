@@ -798,7 +798,7 @@ const ProductDetailPage = () => {
               Volver
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-fire-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-fire-700 dark:text-white">
                 {product.nombre}
               </h1>
               <div className="flex items-center gap-4 mt-1">

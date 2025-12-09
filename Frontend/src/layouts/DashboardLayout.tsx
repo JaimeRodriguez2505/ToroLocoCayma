@@ -169,7 +169,7 @@ const DashboardLayout = () => {
                       <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:opacity-100 opacity-100" />
                     </div>
                   </div>
-                  <span className="text-xl font-bold bg-gradient-to-r from-toro-red to-red-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mobile-text">
+                  <span className="text-xl font-bold text-fire-700 dark:text-white mobile-text">
                     Toro Loco Cayma
                   </span>
                 </Link>
@@ -253,7 +253,7 @@ const DashboardLayout = () => {
                       initial={{ opacity: 0, width: 0 }}
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
-                      className="text-xl font-bold bg-gradient-to-r from-toro-red to-red-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent whitespace-nowrap"
+                      className="text-xl font-bold text-fire-700 dark:text-white whitespace-nowrap"
                     >
                       Toro Loco Cayma
                     </motion.span>

@@ -32,6 +32,8 @@ const config = {
           900: 'hsl(var(--brand-fire-900))',
           950: 'hsl(var(--brand-fire-950))',
         },
+        // Alias legacy para compatibilidad
+        'toro-red': 'hsl(var(--brand-fire-600))',
         ember: {
           50: 'hsl(var(--brand-ember-50))',
           100: 'hsl(var(--brand-ember-100))',

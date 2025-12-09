@@ -776,7 +776,7 @@ const ProductsPage = () => {
           transition={{ duration: 0.5 }}
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-toro-red to-red-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white">
               Productos
             </h1>
             <div className="flex items-center gap-2 mt-1">
