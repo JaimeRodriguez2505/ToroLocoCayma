@@ -3,7 +3,7 @@ services:
     build:
       context: ./Backend
       dockerfile: Dockerfile
-    container_name: tiktendry-backend
+    container_name: toroloco-backend
     restart: unless-stopped
     env_file:
       - ./Backend/.env
@@ -19,11 +19,11 @@ services:
       - ./Backend/src:/app/src
       - ./Backend/src/uploads:/app/src/uploads
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   db:
     image: mysql:8.0
-    container_name: tiktendry-mysql
+    container_name: toroloco-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -36,22 +36,22 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   redis:
     image: redis:alpine
-    container_name: tiktendry-redis
+    container_name: toroloco-redis
     restart: unless-stopped
     ports:
       - "6380:6379"
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   frontend:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
-    container_name: tiktendry-frontend
+    container_name: toroloco-frontend
     restart: unless-stopped
     environment:
       - TZ=America/Lima
@@ -60,13 +60,13 @@ services:
     depends_on:
       - backend
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   landing:
     build:
       context: ./landing
       dockerfile: Dockerfile
-    container_name: tiktendry-landing
+    container_name: toroloco-landing
     restart: unless-stopped
     environment:
       - TZ=America/Lima
@@ -79,13 +79,13 @@ services:
     depends_on:
       - backend
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   factura-php:
     build:
       context: ./Factura
       dockerfile: Dockerfile
-    container_name: tiktendry-factura-php
+    container_name: toroloco-factura-php
     restart: unless-stopped
     environment:
       - TZ=America/Lima
@@ -115,13 +115,13 @@ services:
       - db
       - redis
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   factura-nginx:
     build:
       context: ./Factura
       dockerfile: Dockerfile.nginx
-    container_name: tiktendry-factura-nginx
+    container_name: toroloco-factura-nginx
     restart: unless-stopped
     environment:
       - TZ=America/Lima
@@ -134,21 +134,21 @@ services:
       - ./Backend/src/uploads/certs:/var/www/html/src/uploads/certs
       - ./Backend/src/uploads/logos:/var/www/html/src/uploads/logos
     networks:
-      - tiktendry-net
+      - toroloco-net
 
   nginx:
     image: nginx:alpine
-    container_name: tiktendry-gateway
+    container_name: toroloco-gateway
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     networks:
-      - tiktendry-net
+      - toroloco-net
 
 volumes:
   db_data:
 
 networks:
-  tiktendry-net:
+  toroloco-net:
     driver: bridge
