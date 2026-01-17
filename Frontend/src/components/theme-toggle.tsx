@@ -48,10 +48,10 @@ export function ThemeToggle() {
     <motion.button
       onClick={handleThemeToggle}
       className={`
-        p-2 rounded-full shadow-md backdrop-blur-sm transition-all duration-300 ease-in-out
-        ${theme === "dark" 
-          ? "bg-gray-800/90 hover:bg-gray-700 text-yellow-400" 
-          : "bg-white/90 hover:bg-gray-100 text-indigo-600"
+        p-2.5 rounded-xl shadow-md backdrop-blur-sm transition-all duration-300 ease-in-out border-2
+        ${theme === "dark"
+          ? "bg-muted hover:bg-accent text-primary border-border dark:shadow-primary-glow hover:shadow-fire"
+          : "bg-muted hover:bg-accent text-primary border-border"
         }
       `}
       whileHover={{ scale: 1.1, rotate: theme === "dark" ? 180 : 0 }}
@@ -62,9 +62,9 @@ export function ThemeToggle() {
       aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
     >
       {theme === "dark" ? (
-        <Sun size={20} className="animate-spin-slow" />
+        <Sun size={24} className="animate-spin-slow" />
       ) : (
-        <Moon size={20} className="animate-pulse-soft" />
+        <Moon size={24} className="animate-pulse-soft" />
       )}
     </motion.button>
   )

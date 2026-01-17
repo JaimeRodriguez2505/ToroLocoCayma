@@ -45,6 +45,7 @@ import GenerateExcelProductsPage from "./pages/generate-ticket-pdf/GenerateExcel
 import MarketingPage from "./pages/marketing/MarketingPage"
 
 import LibroReclamacionesPage from "./pages/libro-reclamaciones/LibroReclamacionesPage";
+import ReservasPage from "./pages/reservas/ReservasPage";
 // Importar estilos personalizados
 
 // Create a client
@@ -247,6 +248,15 @@ function App() {
                     element={
                       <RoleProtectedRoute allowedRoles={[1, 2]}>
                         <LibroReclamacionesPage />
+                      </RoleProtectedRoute>
+                    }
+                  />
+                  {/* Ruta para Reservas */}
+                  <Route
+                    path="reservas"
+                    element={
+                      <RoleProtectedRoute allowedRoles={[1, 2, 3]}>
+                        <ReservasPage />
                       </RoleProtectedRoute>
                     }
                   />

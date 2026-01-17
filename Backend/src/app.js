@@ -23,6 +23,7 @@ const carritoGuardadoRoutes = require("./routes/carrito_guardado.routes");
 const comandaRoutes = require("./routes/comanda.routes");
 const gastoPersonalRoutes = require("./routes/gasto_personal.routes");
 const schedulerRoutes = require("./routes/scheduler.routes");
+const reservaRoutes = require("./routes/reserva.routes");
 // Importación de configuración de base de datos
 const { connectDB } = require("./config/database")
 
@@ -36,11 +37,14 @@ connectDB()
 // Middlewares
 app.use(cors({
   origin: [
-    'http://localhost:8080',
-    'http://192.168.1.65:8080',
-    'http://localhost:8000',
-    'http://192.168.1.65:3000',
-    'http://localhost:3000'
+    'http://localhost:4242',      // Frontend (React ERP)
+    'http://localhost:4243',      // Landing (Next.js)
+    'http://localhost:4244',      // Factura
+    'http://127.0.0.1:4242',
+    'http://127.0.0.1:4243',
+    'http://127.0.0.1:4244',
+    'http://localhost:5173',      // Frontend dev
+    'http://127.0.0.1:5173',
   ],
   credentials: true
 }))
@@ -69,6 +73,7 @@ app.use("/api/ecommerce", ecommerceRoutes)
 app.use("/api/marketing", marketingRoutes)
 app.use("/api/libro-reclamaciones", libroReclamacionesRoutes);
 app.use("/api/gastos-personal", gastoPersonalRoutes);
+app.use("/api/reservas", reservaRoutes);
 app.use("/api/scheduler", schedulerRoutes);
 
 // Ruta básica para verificar que el servidor está funcionando

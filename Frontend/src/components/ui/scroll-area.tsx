@@ -13,11 +13,11 @@ interface ScrollAreaProps {
 export const ScrollArea = ({
   className = "",
   children,
-  maxHeight = "200px",
+  maxHeight = "100%",
   maxWidth = "100%",
   viewportClassName = "",
   scrollbarClassName = "",
-  orientation = "vertical",
+  orientation = "vertical", // Default to vertical if not specified
 }: ScrollAreaProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollbarVerticalRef = useRef<HTMLDivElement>(null);
@@ -30,6 +30,21 @@ export const ScrollArea = ({
   const [scrollbarHorizontalWidth, setScrollbarHorizontalWidth] = useState(0);
   const [scrollbarVerticalTop, setScrollbarVerticalTop] = useState(0);
   const [scrollbarHorizontalLeft, setScrollbarHorizontalLeft] = useState(0);
+  
+  // Detect explicit orientation from ScrollBar child if present
+  let effectiveOrientation = orientation;
+  
+  // Filter children to remove ScrollBar (since we handle it internally) but check for its props
+  const filteredChildren = React.Children.map(children, (child) => {
+    if (React.isValidElement(child) && (child.type as any).displayName === "ScrollBar") {
+      const props = child.props as any;
+      if (props.orientation) {
+        effectiveOrientation = props.orientation;
+      }
+      return null;
+    }
+    return child;
+  });
 
   // Calcular el tamaño y la visibilidad de las barras de desplazamiento
   useEffect(() => {
@@ -40,8 +55,16 @@ export const ScrollArea = ({
       const hasVerticalScroll = content.scrollHeight > content.clientHeight;
       const hasHorizontalScroll = content.scrollWidth > content.clientWidth;
       
-      setShowVerticalScrollbar(hasVerticalScroll && (orientation === "vertical" || orientation === "both"));
-      setShowHorizontalScrollbar(hasHorizontalScroll && (orientation === "horizontal" || orientation === "both"));
+      // Use effectiveOrientation or just check if scroll is needed regardless of strict orientation enforcement?
+      // Let's be flexible: if content overflows, show scrollbar unless strictly forbidden.
+      // But for now, stick to the logic.
+      
+      // If we found a ScrollBar child with orientation="horizontal", effectiveOrientation might be "horizontal"
+      // But passing it as prop to ScrollArea is cleaner. 
+      // Let's just assume if it has horizontal scroll, we show it if permitted.
+      
+      setShowVerticalScrollbar(hasVerticalScroll && (effectiveOrientation === "vertical" || effectiveOrientation === "both"));
+      setShowHorizontalScrollbar(hasHorizontalScroll && (effectiveOrientation === "horizontal" || effectiveOrientation === "both"));
       
       // Calcular altura de la barra vertical
       if (hasVerticalScroll) {
@@ -65,7 +88,7 @@ export const ScrollArea = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [children, orientation]);
+  }, [children, effectiveOrientation]);
 
   // Manejar el desplazamiento del contenido
   const handleScroll = () => {
@@ -162,7 +185,7 @@ export const ScrollArea = ({
         className={`h-full w-full overflow-auto scrollbar-hide ${viewportClassName}`}
         onScroll={handleScroll}
       >
-        {children}
+        {filteredChildren}
       </div>
       
       {/* Barra de desplazamiento vertical */}
@@ -205,3 +228,10 @@ export const ScrollArea = ({
     </div>
   );
 };
+
+// Export dummy ScrollBar to satisfy imports from Shadcn-style components
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const ScrollBar = ({ className: _className, orientation: _orientation = "vertical" }: any) => {
+  return null;
+};
+(ScrollBar as any).displayName = "ScrollBar";

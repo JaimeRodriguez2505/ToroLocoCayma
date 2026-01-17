@@ -1,18 +1,18 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, Navigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, ShieldCheck, Zap } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../../components/ui/form"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTheme } from "../../lib/theme"
 import { motion, AnimatePresence } from "framer-motion"
-// import { ThemeToggle } from "../../components/theme-toggle"
 import { useDocumentTitle } from "../../hooks/useDocumentTitle"
+import logo from "../../assets/logo.png"
 
 const loginSchema = z.object({
   email: z.string().email("Ingrese un correo electrónico válido"),
@@ -30,10 +30,7 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const { theme } = useTheme()
   const [isAuth, setIsAuth] = useState(false)
-  const emailRef = useRef<HTMLInputElement>(null)
-  const passwordRef = useRef<HTMLInputElement>(null)
   const [pageLoaded, setPageLoaded] = useState(false)
-  // const [loginSuccess, setLoginSuccess] = useState(false)
 
   // Para animación de partículas
   const [particles, setParticles] = useState<
@@ -41,37 +38,28 @@ const LoginPage = () => {
   >([])
 
   useEffect(() => {
-    // Crear partículas aleatorias con colores basados en el tema
-    const newParticles = Array.from({ length: 25 }).map((_, i) => {
-      // Colores para tema claro
-      let r, g, b
-
-      if (theme === "light") {
-        // Colores pastel para tema claro
-        r = Math.floor(Math.random() * 100) + 155 // 155-255
-        g = Math.floor(Math.random() * 100) + 155 // 155-255
-        b = Math.floor(Math.random() * 100) + 155 // 155-255
-      } else {
-        // Colores más saturados para tema oscuro
-        r = Math.floor(Math.random() * 200) + 55 // 55-255
-        g = Math.floor(Math.random() * 200) + 55 // 55-255
-        b = Math.floor(Math.random() * 200) + 55 // 55-255
-      }
+    // Crear partículas aleatorias con colores basados en el tema (Intense Red + Neutral)
+    const newParticles = Array.from({ length: 30 }).map((_, i) => {
+      // Colores fuego/brasas (Rojo Intenso)
+      const isRed = Math.random() > 0.3; // 70% red, 30% white/grey
+      const r = isRed ? Math.floor(Math.random() * 55) + 200 : 255; 
+      const g = isRed ? Math.floor(Math.random() * 20) : 255;
+      const b = isRed ? Math.floor(Math.random() * 20) : 255;
+      const alpha = Math.random() * 0.5 + 0.1;
 
       return {
         id: i,
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        size: Math.random() * 6 + 2,
-        color: `rgba(${r}, ${g}, ${b}, ${theme === "light" ? 0.2 : 0.3})`,
-        shadow: `0 0 ${Math.random() * 10 + 5}px rgba(${r}, ${g}, ${b}, ${theme === "light" ? 0.3 : 0.5})`,
-        speed: Math.random() * 15 + 10, // Velocidad aleatoria para cada partícula
+        size: Math.random() * 4 + 1,
+        color: `rgba(${r}, ${g}, ${b}, ${alpha})`,
+        shadow: `0 0 ${Math.random() * 15 + 5}px rgba(${r}, ${g}, ${b}, ${alpha})`,
+        speed: Math.random() * 20 + 5,
       }
     })
 
     setParticles(newParticles)
 
-    // Establecer pageLoaded como true después de un breve retraso
     const timer = setTimeout(() => {
       setPageLoaded(true)
     }, 100)
@@ -80,29 +68,17 @@ const LoginPage = () => {
   }, [theme])
 
   useEffect(() => {
-    // Verificar si ya está autenticado al cargar la página
     const auth = checkAuth()
     setIsAuth(auth)
 
-    // Check for session_expired flag
     const sessionExpired = localStorage.getItem("session_expired")
     if (sessionExpired) {
       toast.error("Tu sesión ha expirado. Por favor inicia sesión nuevamente.")
       localStorage.removeItem("session_expired")
     }
 
-    // Asegurarse de que el tema se aplique correctamente
-    const storedTheme = localStorage.getItem("tiktendry-theme")
-    if (storedTheme) {
-      const themeData = JSON.parse(storedTheme)
-      const currentTheme = themeData.state?.theme || "light"
-
-      if (currentTheme === "dark") {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
-    }
+    // Force dark mode for login page consistency
+    document.documentElement.classList.add("dark")
   }, [checkAuth])
 
   const form = useForm<LoginFormValues>({
@@ -113,21 +89,10 @@ const LoginPage = () => {
     },
   })
 
-  // Si ya está autenticado, redirigir al dashboard
   if (isAuth || isAuthenticated) {
     return <Navigate to="/" />
   }
 
-  const focusField = (field: string) => {
-    setActiveField(field)
-    if (field === "email" && emailRef.current) {
-      emailRef.current.focus()
-    } else if (field === "password" && passwordRef.current) {
-      passwordRef.current.focus()
-    }
-  }
-
-  // Variantes para animaciones
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -157,11 +122,12 @@ const LoginPage = () => {
       opacity: 1,
       transition: {
         delay: 0.2 + i * 0.2,
-        duration: 0.8,
+        duration: 1.5,
         ease: "easeOut",
       },
     }),
   }
+
   const handleLogin = async (data: LoginFormValues) => {
     setIsLoading(true)
     try {
@@ -169,24 +135,14 @@ const LoginPage = () => {
       navigate("/")
     } catch (error: any) {
       setIsLoading(false)
-
-      // Verificar si es un error de restricción horaria
       if (error.message && error.message.includes("Acceso denegado fuera del horario laboral")) {
-        toast.error(error.message, {
-          duration: 5000,
-        })
-      } 
-      // Verificar si es un error de autorización por rol
-      else if (error.message && error.message.includes("No tienes autorización para acceder al sistema")) {
-        toast.error("No tienes autorización para acceder al sistema. Contacta con un administrador.", {
-          duration: 6000,
-        })
-      }
-      // Otros errores
-      else {
-        // Verificar si es un error 400 genérico y mostrar un mensaje más específico
+        toast.error(error.message, { duration: 5000 })
+      } else if (error.message && error.message.includes("No tienes autorización para acceder al sistema")) {
+        toast.error("No tienes autorización para acceder al sistema. Contacta con un administrador.", { duration: 6000 })
+      } else {
         if (error.response?.status === 400) {
-          toast.error(error.response?.data?.msg || error.response?.data?.message || "Credenciales incorrectas")        } else {
+          toast.error(error.response?.data?.msg || error.response?.data?.message || "Credenciales incorrectas")
+        } else {
           toast.error(error.response?.data?.message || error.message || "Error al iniciar sesión")
         }
       }
@@ -194,63 +150,46 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-x-hidden transition-all duration-500 bg-background text-foreground toro-theme ruby-neon-bg-subtle">
+    <div className="min-h-screen w-full relative overflow-hidden bg-background text-foreground selection:bg-primary/30 font-sans">
       <AnimatePresence>
         {pageLoaded && (
-          <>            {/* Decoraciones de fondo */}
+          <>
+            {/* Background Decorations - Minimalist & Intense */}
             <motion.div
-              className="absolute top-[10%] left-[5%] w-72 h-72 rounded-full blur-3xl opacity-20 bg-toro-red/30"
+              className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-20 bg-primary"
               custom={1}
               initial="hidden"
               animate="visible"
               variants={decorationVariants}
             />
             <motion.div
-              className="absolute bottom-[20%] right-[10%] w-64 h-64 rounded-full blur-3xl opacity-20 bg-red-600/30"
+              className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full blur-[150px] opacity-15 bg-primary"
               custom={2}
               initial="hidden"
               animate="visible"
               variants={decorationVariants}
             />
-            <motion.div
-              className="absolute top-[40%] right-[30%] w-48 h-48 rounded-full blur-3xl opacity-20 bg-red-700/30"
-              custom={3}
-              initial="hidden"
-              animate="visible"
-              variants={decorationVariants}
-            />            {/* Patrón de grid de fondo */}
-            <motion.svg
-              className="absolute inset-0 w-full h-full text-slate-600 opacity-30 pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.3 }}
-              transition={{ delay: 0.5, duration: 1.5 }}
-            >
-              <pattern id="grid-pattern" width="50" height="50" patternUnits="userSpaceOnUse">
-                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" strokeWidth="0.5" />
-              </pattern>
-              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
-            </motion.svg>
+            
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%) pointer-events-none opacity-20"></div>
           </>
         )}
-      </AnimatePresence>      {/* Partículas flotantes */}
-      <div className="absolute w-full h-full overflow-hidden">
+      </AnimatePresence>
+
+      {/* Floating Particles */}
+      <div className="absolute w-full h-full overflow-hidden pointer-events-none z-0">
         {particles.map((particle) => (
           <motion.div
             key={particle.id}
-            className="absolute rounded-full pointer-events-none"
-            initial={{
-              x: particle.x,
-              y: particle.y,
-              opacity: 0,
-            }}
+            className="absolute rounded-full mix-blend-screen"
+            initial={{ x: particle.x, y: particle.y, opacity: 0 }}
             animate={{
-              x: [particle.x, Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-              y: [particle.y, Math.random() * window.innerHeight, Math.random() * window.innerHeight],
-              opacity: [0, 0.7, 0.3],
+              y: [particle.y, particle.y - Math.random() * 200 - 50],
+              opacity: [0, particle.color.includes('255, 255, 255') ? 0.3 : 0.6, 0],
             }}
             transition={{
               duration: particle.speed,
-              delay: Math.random() * 1,
+              delay: Math.random() * 2,
               repeat: Number.POSITIVE_INFINITY,
               ease: "linear",
             }}
@@ -264,351 +203,190 @@ const LoginPage = () => {
         ))}
       </div>
 
-      {/* Botón de tema */}
-      <motion.div
-        className="fixed top-6 right-6 z-50"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        {/* <ThemeToggle /> */}
-      </motion.div>      {/* Contenedor principal */}
+      {/* Main Container */}
       <motion.div
         className="w-full min-h-screen p-4 relative z-10 flex items-center justify-center"
         initial="hidden"
         animate={pageLoaded ? "visible" : "hidden"}
         variants={containerVariants}
       >
-        <motion.div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16" variants={containerVariants}>
-          {/* Sección izquierda - Branding e ilustración */}
-          <motion.div className="w-full max-w-lg flex flex-col items-center lg:items-start" variants={itemVariants}>
-            <div className="text-center lg:text-left mb-8">
-              <motion.div
-                className="inline-block mb-4 animate-float"
+        <motion.div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24" variants={containerVariants}>
+          
+          {/* Left Section - Branding */}
+          <motion.div className="w-full max-w-lg flex flex-col items-center lg:items-start text-center lg:text-left" variants={itemVariants}>
+            <div className="relative mb-10 group cursor-default">
+              <motion.div 
+                className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full scale-150 group-hover:bg-primary/30 transition-all duration-700"
+                animate={{ scale: [1.4, 1.6, 1.4], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              ></motion.div>
+              <motion.img 
+                src={logo}
+                alt="Toro Loco Logo" 
+                className="w-64 h-64 lg:w-80 lg:h-80 object-contain relative z-10 drop-shadow-[0_0_50px_rgba(236,19,19,0.3)] transform group-hover:scale-105 transition-transform duration-500"
                 variants={itemVariants}
-                animate={{
-                  rotate: [0, 5, 0, -5, 0],
-                  scale: [1, 1.05, 1, 1.05, 1],
-                }}
-                transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
-              >
-                <div className="w-24 h-24 mx-auto lg:mx-0 rounded-2xl ruby-neon-bg p-1 shadow-lg">
-                  <div className="w-full h-full rounded-xl flex items-center justify-center bg-background">
-                    <img 
-                      src="/logo.png" 
-                      alt="Toro Loco Logo" 
-                      className="w-16 h-16 object-contain dark:opacity-100 opacity-90 dark:bg-transparent bg-slate-800/10 rounded-full p-1" 
-                    />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.h1 className="text-4xl md:text-5xl font-bold mb-2 ruby-neon-text" variants={itemVariants}>
-                Toro Loco Cayma
-              </motion.h1>
-
-              <motion.p className="text-lg mb-6 text-muted-foreground" variants={itemVariants}>
-                Sistema de gestión de inventario y facturación para tu negocio
-              </motion.p>
-
-              <div className="hidden lg:block">
-                <motion.div className="flex items-center mb-3 pl-2 relative hover:translate-x-1 transition-transform duration-300" variants={itemVariants}>
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-gradient-to-r from-toro-red to-red-600"></div>
-                  <span>Gestiona tu inventario de manera eficiente</span>
-                </motion.div>
-
-                <motion.div className="flex items-center mb-3 pl-2 relative hover:translate-x-1 transition-transform duration-300" variants={itemVariants}>
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-gradient-to-r from-red-600 to-red-700"></div>
-                  <span>Controla tus ventas en tiempo real</span>
-                </motion.div>
-
-                <motion.div className="flex items-center mb-3 pl-2 relative hover:translate-x-1 transition-transform duration-300" variants={itemVariants}>
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full bg-gradient-to-r from-red-700 to-red-800"></div>
-                  <span>Genera reportes detallados</span>
-                </motion.div>
-              </div>
-            </div>            {/* Ilustración con animación */}
-            <motion.div className="hidden lg:block relative w-full max-w-lg mt-8" variants={itemVariants}>
-              <svg className="w-full h-auto" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <motion.path
-                  d="M140.5 32C63.5 32 0.5 95 0.5 172C0.5 249 63.5 312 140.5 312H359.5C436.5 312 499.5 249 499.5 172C499.5 95 436.5 32 359.5 32H140.5Z"
-                  className="fill-ember-500/10"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.5, delay: 0.5 }}
-                />
-                <motion.rect
-                  x="107.5"
-                  y="107"
-                  width="285"
-                  height="130"
-                  rx="10"
-                  className={theme === 'light' ? 'fill-white' : 'fill-slate-800'}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                />
-                <motion.rect
-                  x="127.5"
-                  y="137"
-                  width="120"
-                  height="10"
-                  rx="5"
-                  className={theme === 'light' ? 'fill-slate-300' : 'fill-slate-600'}
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 120 }}
-                  transition={{ duration: 0.4, delay: 1.1 }}
-                />
-                <motion.rect
-                  x="127.5"
-                  y="157"
-                  width="80"
-                  height="10"
-                  rx="5"
-                  className={theme === 'light' ? 'fill-slate-300' : 'fill-slate-600'}
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 80 }}
-                  transition={{ duration: 0.3, delay: 1.2 }}
-                />
-                <motion.rect
-                  x="127.5"
-                  y="177"
-                  width="100"
-                  height="10"
-                  rx="5"
-                  className={theme === 'light' ? 'fill-slate-300' : 'fill-slate-600'}
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 100 }}
-                  transition={{ duration: 0.3, delay: 1.3 }}
-                />
-                <motion.rect
-                  x="127.5"
-                  y="197"
-                  width="60"
-                  height="10"
-                  rx="5"
-                  className={theme === 'light' ? 'fill-slate-300' : 'fill-slate-600'}
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 60 }}
-                  transition={{ duration: 0.2, delay: 1.4 }}
-                />                <motion.circle
-                  cx="307.5"
-                  cy="172"
-                  r="35"
-                  className="fill-ember-500"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 1.5 }}
-                />
-                <motion.path
-                  d="M298.5 172L305.5 179L318.5 166"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 1.8 }}
-                />
-              </svg>
-            </motion.div>
-          </motion.div>          {/* Sección derecha - Formulario de login */}
-          <motion.div className="w-full max-w-md flex flex-col items-center" variants={itemVariants}>
-            <motion.div
-              className="w-full backdrop-blur-md border-none overflow-hidden relative rounded-2xl transition-all duration-300 shadow-2xl ruby-neon-card"
-              variants={itemVariants}
-              whileHover={{ boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)" }}
-            >
-              <motion.div
-                className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-toro-red via-red-600 to-red-700 animate-gradient-x"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 0.8, delay: 1 }}
               />
+            </div>
 
-              <div className="relative z-10 p-8">
-                <motion.div className="mb-8 text-center" variants={itemVariants}>
-                  <h2 className="text-2xl font-bold mb-2 ruby-neon-text">Bienvenido de nuevo</h2>
-                  <p className="text-sm text-muted-foreground">Ingresa tus credenciales para continuar</p>
-                </motion.div>                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6">
-                    {/* Campo de email */}
-                    <motion.div
-                      className={`relative transition-all duration-300 mb-4 ${
-                        activeField === "email" ? "transform -translate-y-1" : ""
-                      }`}
-                      variants={itemVariants}
-                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div className={`absolute inset-0 rounded-2xl p-[1px] pointer-events-none transition-all duration-300 ${
-                        activeField === "email" 
-                          ? 'bg-gradient-to-r from-toro-red via-red-600 to-red-700 animate-gradient-x shadow-lg shadow-toro-red/20' 
-                          : 'bg-slate-600'
-                      }`}></div>
-                      <div className="relative flex items-center rounded-xl p-1 transition-all duration-300 bg-slate-800/90" onClick={() => focusField("email")}>
-                        <div className={`flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-300 ${
-                          activeField === "email" 
-                            ? 'bg-toro-red/10 text-toro-red' 
-                            : 'bg-slate-700 text-slate-400'
-                        }`}>
-                          <Mail size={20} />
-                        </div>
-                        <div className="flex-1 ml-3">
-                          <label htmlFor="email" className={`block text-xs font-medium mb-1 transition-all duration-200 ${
-                            activeField === "email" 
-                              ? 'text-toro-red' 
-                              : 'text-slate-300'
-                          }`}>
-                            Correo electrónico
-                          </label>
-                          <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <input
-                                    id="email"
-                                    type="email"
-                                    {...field}
-                                    onFocus={() => setActiveField("email")}
-                                    onBlur={() => setActiveField(null)}
-                                    placeholder="nombre@empresa.com"
-                                    className="w-full bg-transparent border-none text-base outline-none py-2 px-3 transition-all duration-200 text-slate-100 placeholder-slate-500"
-                                  />
-                                </FormControl>
-                                <FormMessage className="text-xs text-red-500 mt-1" />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </motion.div>                    {/* Campo de contraseña */}
-                    <motion.div
-                      className={`relative transition-all duration-300 mb-4 ${
-                        activeField === "password" ? "transform -translate-y-1" : ""
-                      }`}
-                      variants={itemVariants}
-                      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div className={`absolute inset-0 rounded-2xl p-[1px] pointer-events-none transition-all duration-300 ${
-                        activeField === "password" 
-                          ? 'bg-gradient-to-r from-toro-red via-red-600 to-red-700 animate-gradient-x shadow-lg shadow-toro-red/20' 
-                          : 'bg-slate-600'
-                      }`}></div>
-                      <div className="relative flex items-center rounded-xl p-1 transition-all duration-300 bg-slate-800/90" onClick={() => focusField("password")}>
-                        <div className={`flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-300 ${
-                          activeField === "password" 
-                            ? 'bg-toro-red/10 text-toro-red' 
-                            : 'bg-slate-700 text-slate-400'
-                        }`}>
-                          <Lock size={20} />
-                        </div>
-                        <div className="flex-1 ml-3">
-                          <label htmlFor="password" className={`block text-xs font-medium mb-1 transition-all duration-200 ${
-                            activeField === "password" 
-                              ? 'text-toro-red' 
-                              : 'text-slate-300'
-                          }`}>
-                            Contraseña
-                          </label>
-                          <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <div className="relative">
+            <motion.h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tight font-heading" variants={itemVariants}>
+              <span className="text-white">TORO</span>
+              <span className="text-primary glow-text ml-4">LOCO</span>
+            </motion.h1>
+
+            <motion.div className="h-1 w-24 bg-gradient-to-r from-primary to-transparent mb-6 rounded-full" variants={itemVariants} />
+
+            <motion.p className="text-xl text-neutral-400 font-light max-w-md leading-relaxed" variants={itemVariants}>
+              Sistema integral de gestión para restaurantes. Control, eficiencia y velocidad en tiempo real.
+            </motion.p>
+          </motion.div>
+
+          {/* Right Section - Login Form */}
+          <motion.div className="w-full max-w-[420px]" variants={itemVariants}>
+            <motion.div
+              className="relative overflow-hidden rounded-3xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 shadow-2xl"
+              variants={itemVariants}
+              whileHover={{ boxShadow: "0 0 50px -10px rgba(236, 19, 19, 0.15)", borderColor: "rgba(255, 255, 255, 0.1)" }}
+            >
+              {/* Top Gradient Line */}
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-70" />
+
+              <div className="p-8 md:p-10 relative z-10">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-white mb-2 font-heading">Bienvenido</h2>
+                  <p className="text-neutral-400 text-sm">Ingresa a tu panel de control</p>
+                </div>
+
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-5">
+                    
+                    {/* Email Field */}
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className={`group relative transition-all duration-300 rounded-2xl bg-black/40 border border-white/5 ${
+                                activeField === "email" ? 'border-primary/50 shadow-[0_0_20px_-5px_rgba(236,19,19,0.3)]' : 'hover:border-white/10'
+                              }`}>
+                                <div className="flex items-center px-4 py-3.5">
+                                  <div className={`p-2 rounded-xl transition-colors ${
+                                    activeField === "email" ? 'bg-primary/10 text-primary' : 'bg-neutral-800/50 text-neutral-400'
+                                  }`}>
+                                    <Mail size={18} />
+                                  </div>
+                                  <div className="flex-1 ml-3">
+                                    <label className={`block text-[10px] uppercase tracking-wider font-semibold transition-colors ${
+                                      activeField === "email" ? 'text-primary' : 'text-neutral-500'
+                                    }`}>
+                                      Correo
+                                    </label>
                                     <input
-                                      id="password"
+                                      {...field}
+                                      onFocus={() => setActiveField("email")}
+                                      onBlur={() => setActiveField(null)}
+                                      placeholder="usuario@toroloco.com"
+                                      className="w-full bg-transparent border-none text-sm text-white placeholder-neutral-600 focus:ring-0 p-0 mt-0.5 font-medium"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs text-primary mt-1" />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    {/* Password Field */}
+                    <motion.div variants={itemVariants}>
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className={`group relative transition-all duration-300 rounded-2xl bg-black/40 border border-white/5 ${
+                                activeField === "password" ? 'border-primary/50 shadow-[0_0_20px_-5px_rgba(236,19,19,0.3)]' : 'hover:border-white/10'
+                              }`}>
+                                <div className="flex items-center px-4 py-3.5">
+                                  <div className={`p-2 rounded-xl transition-colors ${
+                                    activeField === "password" ? 'bg-primary/10 text-primary' : 'bg-neutral-800/50 text-neutral-400'
+                                  }`}>
+                                    <Lock size={18} />
+                                  </div>
+                                  <div className="flex-1 ml-3 relative">
+                                    <label className={`block text-[10px] uppercase tracking-wider font-semibold transition-colors ${
+                                      activeField === "password" ? 'text-primary' : 'text-neutral-500'
+                                    }`}>
+                                      Contraseña
+                                    </label>
+                                    <input
                                       type={showPassword ? "text" : "password"}
                                       {...field}
                                       onFocus={() => setActiveField("password")}
                                       onBlur={() => setActiveField(null)}
                                       placeholder="••••••••"
-                                      className="w-full bg-transparent border-none text-base outline-none py-2 px-3 pr-10 transition-all duration-200 text-slate-100 placeholder-slate-500"
+                                      className="w-full bg-transparent border-none text-sm text-white placeholder-neutral-600 focus:ring-0 p-0 mt-0.5 font-medium"
                                     />
-                                    <button
-                                      type="button"
-                                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 transition-all duration-200 rounded hover:scale-110 text-slate-400 hover:text-toro-red hover:bg-toro-red/10"
-                                      onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
                                   </div>
-                                </FormControl>
-                                <FormMessage className="text-xs text-red-500 mt-1" />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </motion.div>                    {/* Botón de inicio de sesión */}
+                                  <button
+                                    type="button"
+                                    className="p-2 text-neutral-500 hover:text-white transition-colors"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                  >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                  </button>
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs text-primary mt-1" />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+
+                    {/* Submit Button */}
                     <motion.button
                       type="submit"
                       disabled={isLoading}
-                      className={`relative w-full h-14 rounded-xl overflow-hidden transition-all duration-300 mt-8 border-none cursor-pointer font-semibold text-base flex items-center justify-center text-black shadow-lg ruby-neon-button ${isLoading ? 'animate-pulse' : ''}`}
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                      whileTap={{ scale: 0.97 }}
+                      className={`w-full h-14 rounded-2xl font-bold text-base flex items-center justify-center text-white shadow-lg transition-all duration-300 mt-6 relative overflow-hidden group ${
+                        isLoading ? 'opacity-80 cursor-wait' : 'hover:scale-[1.02] active:scale-[0.98]'
+                      }`}
+                      style={{
+                        background: "linear-gradient(135deg, #EC1313 0%, #B91010 100%)",
+                        boxShadow: "0 10px 30px -10px rgba(236, 19, 19, 0.5)"
+                      }}
+                      whileHover={{ boxShadow: "0 15px 35px -5px rgba(236, 19, 19, 0.6)" }}
                     >
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-2xl" />
+                      
                       {isLoading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                          <span>Iniciando sesión...</span>
+                        <div className="flex items-center gap-2 relative z-10">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Procesando...</span>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <LogIn className="transition-transform duration-300 group-hover:-translate-x-1" size={20} />
-                          <span>Iniciar sesión</span>
+                        <div className="flex items-center gap-2 relative z-10">
+                          <span>Iniciar Sesión</span>
+                          <Zap size={18} className="fill-white" />
                         </div>
                       )}
                     </motion.button>
 
-                    {/* Enlace de registro */}
-                    <motion.div className="text-center mt-6" variants={itemVariants}>
-                      <p className="text-muted-foreground">
-                        Contacta con un administrador si necesitas una cuenta
-                      </p>
-                    </motion.div>
                   </form>
                 </Form>
               </div>
-            </motion.div>            {/* Indicadores de seguridad */}
-            <motion.div className="flex items-center justify-center gap-4 mt-8" variants={itemVariants}>
-              <motion.div className="flex items-center text-xs px-3 py-2 rounded-full transition-all duration-300 border text-slate-400 bg-slate-800/50 border-slate-700/50" whileHover={{ scale: 1.05, y: -2 }}>
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Conexión segura
-              </motion.div>
-              <div className="w-1 h-1 rounded-full bg-slate-600"></div>
-              <motion.div className="flex items-center text-xs px-3 py-2 rounded-full transition-all duration-300 border text-slate-400 bg-slate-800/50 border-slate-700/50" whileHover={{ scale: 1.05, y: -2 }}>
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  ></path>
-                </svg>
-                Datos protegidos
-              </motion.div>
+
+              {/* Footer Status */}
+              <div className="bg-black/40 px-8 py-4 border-t border-white/5 flex items-center justify-between text-[10px] text-neutral-500 font-medium uppercase tracking-wider">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck size={12} className="text-emerald-500" />
+                  <span>Seguro</span>
+                </div>
+                <div>v2.0.26</div>
+              </div>
             </motion.div>
           </motion.div>
         </motion.div>

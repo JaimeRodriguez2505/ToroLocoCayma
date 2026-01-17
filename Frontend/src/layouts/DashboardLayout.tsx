@@ -41,6 +41,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog"
+import logo from "../assets/logo.png"
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -122,6 +123,7 @@ const DashboardLayout = () => {
         allowedRoles: [1, 2],
       },
       { path: "/libro-reclamaciones", label: "Libro de Reclamaciones", icon: <AlertTriangle className="h-5 w-5" />, allowedRoles: [1, 2] },
+      { path: "/reservas", label: "Mesas Reservadas", icon: <ClipboardList className="h-5 w-5" />, allowedRoles: [1, 2, 3] },
       { path: "/company", label: "Empresa", icon: <Building2 className="h-5 w-5" />, allowedRoles: [1] },
       { path: "/users", label: "Usuarios", icon: <User className="h-5 w-5" />, allowedRoles: [1] },
       { path: "/audit-logs", label: "Logs de Auditoría", icon: <FileText className="h-5 w-5" />, allowedRoles: [1] },
@@ -158,26 +160,27 @@ const DashboardLayout = () => {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-card/95 backdrop-blur-xl border-r border-border lg:hidden shadow-2xl mobile-scroll overflow-y-auto"
+            className="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-neutral-900/95 backdrop-blur-xl border-r border-neutral-800 lg:hidden shadow-2xl mobile-scroll overflow-y-auto"
           >
             <div className="flex flex-col h-full">
               {/* Mobile Sidebar Header */}
-              <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+              <div className="flex items-center justify-between p-4 border-b border-neutral-800 shrink-0">
                 <Link to="/" className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-fire-600 to-ember-600 rounded-xl fire-glow">
-                    <div className="w-6 h-6 flex items-center justify-center">
-                      <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain dark:opacity-100 opacity-100" />
+                  <div className="p-2 rounded-xl animate-flicker">
+                    <div className="w-16 h-16 flex items-center justify-center">
+                      <img 
+                        src={logo} 
+                        alt="Logo" 
+                        className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]" 
+                      />
                     </div>
                   </div>
-                  <span className="text-xl font-bold text-fire-700 dark:text-white mobile-text">
-                    Toro Loco Cayma
-                  </span>
                 </Link>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-muted-foreground hover:text-foreground mobile-button"
+                  className="text-neutral-400 hover:text-white mobile-button"
                 >
                   <X className="h-5 w-5 mobile-icon" />
                 </Button>
@@ -195,12 +198,12 @@ const DashboardLayout = () => {
                     <Link
                       to={item.path}
                       className={`group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === item.path
-                          ? "bg-gradient-to-r from-toro-red/10 via-red-500/10 to-red-600/10 text-toro-red dark:text-toro-red shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          ? "bg-primary text-white shadow-md shadow-red-900/20"
+                          : "text-neutral-400 hover:text-white hover:bg-white/5"
                         }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <div className={`transition-colors ${location.pathname === item.path ? "text-toro-red dark:text-toro-red" : "text-foreground/70 group-hover:text-foreground"
+                      <div className={`transition-colors ${location.pathname === item.path ? "text-white" : "text-neutral-400 group-hover:text-white"
                         }`}>
                         {item.icon}
                       </div>
@@ -208,7 +211,7 @@ const DashboardLayout = () => {
                       {location.pathname === item.path && (
                         <motion.div
                           layoutId="mobileActiveIndicator"
-                          className="ml-auto h-2 w-2 rounded-full bg-gradient-to-r from-toro-red to-red-500"
+                          className="ml-auto h-2 w-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"
                         />
                       )}
                     </Link>
@@ -217,10 +220,10 @@ const DashboardLayout = () => {
               </nav>
 
               {/* Mobile Sidebar Footer */}
-              <div className="p-3 border-t border-border shrink-0">
+              <div className="p-3 border-t border-neutral-800 shrink-0">
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-muted-foreground hover:text-foreground mobile-button"
+                  className="w-full justify-start text-neutral-400 hover:text-white mobile-button hover:bg-white/5 border-neutral-800 bg-transparent"
                   onClick={handleLogoutRequest}
                 >
                   <LogOut className="h-4 w-4 mr-3 mobile-icon" />
@@ -242,23 +245,11 @@ const DashboardLayout = () => {
         >
           <div className="flex flex-col h-full">
             {/* Desktop Sidebar Header */}
-            <div className="p-3 sm:p-4 border-b border-border mobile-padding">
-              <Link to="/" className="flex items-center gap-3">
-                <div className="relative w-14 h-14 flex items-center justify-center">
-                  <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain toro-logo-animation dark:opacity-100 opacity-90 dark:bg-transparent bg-slate-800/10 rounded-full p-1" />
+            <div className="p-3 sm:p-4 border-b border-border mobile-padding flex items-center justify-center overflow-hidden">
+              <Link to="/" className="flex items-center justify-center">
+                <div className={`relative flex items-center justify-center animate-flicker transition-all duration-300 bg-gradient-to-br from-red-600 to-red-800 rounded-xl p-2 shadow-lg shadow-red-900/20 dark:bg-transparent dark:shadow-none dark:p-0 dark:drop-shadow-[0_0_15px_rgba(220,38,38,0.3)] ${sidebarOpen ? "w-40 h-20" : "w-10 h-10"}`}>
+                  <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <AnimatePresence>
-                  {sidebarOpen && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: "auto" }}
-                      exit={{ opacity: 0, width: 0 }}
-                      className="text-xl font-bold text-fire-700 dark:text-white whitespace-nowrap"
-                    >
-                      Toro Loco Cayma
-                    </motion.span>
-                  )}
-                </AnimatePresence>
               </Link>
             </div>
 
@@ -276,12 +267,12 @@ const DashboardLayout = () => {
                       <TooltipTrigger asChild>
                         <Link
                           to={item.path}
-                          className={`group flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${location.pathname === item.path
-                              ? "bg-gradient-to-r from-toro-red/10 via-red-500/10 to-red-600/10 text-toro-red dark:text-toro-red shadow-sm"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          className={`group flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 relative ${location.pathname === item.path
+                              ? "bg-primary text-primary-foreground shadow-md dark:shadow-fire"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             }`}
                         >
-                          <div className={`transition-colors flex-shrink-0 ${location.pathname === item.path ? "text-toro-red dark:text-toro-red" : "text-foreground/70 group-hover:text-foreground"
+                          <div className={`transition-colors flex-shrink-0 ${location.pathname === item.path ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
                             }`}>
                             {item.icon}
                           </div>
@@ -300,13 +291,13 @@ const DashboardLayout = () => {
                           {location.pathname === item.path && (
                             <motion.div
                               layoutId="desktopActiveIndicator"
-                              className="absolute right-2 h-2 w-2 rounded-full bg-gradient-to-r from-toro-red to-red-500"
+                              className="absolute right-2 h-2 w-2 rounded-full bg-primary-foreground shadow-[0_0_10px_rgba(255,255,255,0.8)]"
                             />
                           )}
                         </Link>
                       </TooltipTrigger>
                       {!sidebarOpen && (
-                        <TooltipContent side="right" className="ml-2">
+                        <TooltipContent side="right" className="ml-2 bg-popover text-popover-foreground border-border">
                           {item.label}
                         </TooltipContent>
                       )}
@@ -323,7 +314,7 @@ const DashboardLayout = () => {
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
-                      className={`w-full text-muted-foreground hover:text-foreground mobile-button ${sidebarOpen ? "justify-start" : "justify-center"
+                      className={`w-full text-muted-foreground hover:text-foreground mobile-button hover:bg-accent border-border bg-transparent ${sidebarOpen ? "justify-start" : "justify-center"
                         }`}
                       onClick={handleLogoutRequest}
                     >
@@ -343,7 +334,7 @@ const DashboardLayout = () => {
                     </Button>
                   </TooltipTrigger>
                   {!sidebarOpen && (
-                    <TooltipContent side="right" className="ml-2">
+                    <TooltipContent side="right" className="ml-2 bg-popover text-popover-foreground border-border">
                       Cerrar Sesión
                     </TooltipContent>
                   )}
@@ -363,7 +354,7 @@ const DashboardLayout = () => {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {/* Header */}
-        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-background/95 backdrop-blur-xl border-b border-border shrink-0">
+        <header className="sticky top-0 z-20 flex items-center justify-between h-16 px-4 bg-background/80 backdrop-blur-md border-b border-border shrink-0">
           {/* Left side */}
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Mobile menu button */}
@@ -371,7 +362,7 @@ const DashboardLayout = () => {
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden mobile-button"
+              className="lg:hidden mobile-button text-foreground hover:bg-accent"
             >
               <Menu className="h-5 w-5 mobile-icon" />
             </Button>
@@ -384,7 +375,7 @@ const DashboardLayout = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="hidden lg:flex mobile-button"
+                    className="hidden lg:flex mobile-button text-foreground hover:bg-accent"
                   >
                     <motion.div
                       animate={{ rotate: sidebarOpen ? 0 : 180 }}
@@ -394,7 +385,7 @@ const DashboardLayout = () => {
                     </motion.div>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">
+                <TooltipContent side="bottom" className="bg-popover text-popover-foreground border-border">
                   {sidebarOpen ? "Colapsar menú" : "Expandir menú"}
                   <div className="text-xs opacity-70 mt-1">Alt + S</div>
                 </TooltipContent>
@@ -404,12 +395,9 @@ const DashboardLayout = () => {
             {/* Page title for mobile */}
             <div className="lg:hidden">
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-6 h-6 flex items-center justify-center">
-                  <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain dark:opacity-100 opacity-90 dark:bg-transparent bg-slate-800/10 rounded-full p-0.5" />
+                <div className="w-8 h-8 flex items-center justify-center animate-flicker bg-gradient-to-br from-red-600 to-red-800 rounded-md p-1 shadow-md shadow-red-900/20 dark:bg-transparent dark:shadow-none dark:p-0">
+                  <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                 </div>
-                <span className="text-lg font-bold bg-gradient-to-r from-toro-red to-red-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mobile-text">
-                  Toro Loco Cayma
-                </span>
               </Link>
             </div>
           </div>
@@ -425,12 +413,12 @@ const DashboardLayout = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowShortcutModal(true)}
-                    className="hidden sm:flex mobile-button"
+                    className="hidden sm:flex mobile-button text-muted-foreground hover:text-foreground hover:bg-accent"
                   >
                     <HelpCircle className="h-5 w-5 mobile-icon" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">
+                <TooltipContent side="bottom" className="bg-popover text-popover-foreground border-border">
                   Atajos de teclado
                 </TooltipContent>
               </Tooltip>
@@ -439,11 +427,11 @@ const DashboardLayout = () => {
             <ThemeToggle />
 
             {/* User info */}
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/50 mobile-padding">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-toro-red to-red-600 flex items-center justify-center">
-                <User className="h-4 w-4 text-white mobile-icon" />
+            <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-card mobile-padding border border-border hover:border-primary/50 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-primary mobile-icon" />
               </div>
-              <span className="font-medium text-sm hidden sm:block mobile-text">{user?.name || "Usuario"}</span>
+              <span className="font-medium text-sm hidden sm:block mobile-text text-foreground">{user?.name || "Usuario"}</span>
             </div>
           </div>
         </header>
@@ -458,25 +446,25 @@ const DashboardLayout = () => {
 
       {/* Logout Confirmation Dialog */}
       <AlertDialog open={logoutConfirmOpen} onOpenChange={setLogoutConfirmOpen}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-md bg-neutral-900 border-neutral-800 text-white">
           <AlertDialogHeader>
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-950 flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <div className="w-12 h-12 rounded-full bg-red-900/20 flex items-center justify-center animate-ember-pulse">
+                <AlertTriangle className="h-6 w-6 text-red-500" />
               </div>
             </div>
             <AlertDialogTitle className="text-center text-xl font-semibold">
               ¿Cerrar sesión?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-muted-foreground">
+            <AlertDialogDescription className="text-center text-neutral-400">
               ¿Estás seguro de que deseas cerrar tu sesión? Tendrás que volver a iniciar sesión para acceder a tu cuenta.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-center gap-3 mt-6">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700 hover:text-white">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLogoutConfirm}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white shadow-ember"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Cerrar Sesión

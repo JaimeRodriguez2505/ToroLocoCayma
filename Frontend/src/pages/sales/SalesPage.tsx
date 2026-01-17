@@ -496,18 +496,18 @@ const SalesPage = () => {
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="bg-card/50 border-border/20 backdrop-blur-sm rounded-lg p-4"
+          className="bg-card border border-border rounded-2xl p-6 shadow-sm dark:shadow-ember"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div className="space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white flex items-center">
-                <ShoppingCart className="mr-3 h-7 w-7 text-toro-red dark:text-toro-red" />
+              <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground flex items-center">
+                <ShoppingCart className="mr-3 h-7 w-7 text-primary" />
                 Ventas
               </h1>
-              <p className="text-foreground/70">Gestiona y visualiza el historial de ventas</p>
+              <p className="text-muted-foreground text-base">Gestiona y visualiza el historial de ventas</p>
             </div>
             <div className="flex items-center gap-2">
               <TooltipProvider>
@@ -516,17 +516,18 @@ const SalesPage = () => {
                     <div>
                       <Button
                         asChild={isWithinBusinessHours}
-                        className={`bg-gradient-to-r from-toro-red to-red-600 hover:from-red-700 hover:to-red-700 text-white rounded-xl px-4 py-2 font-medium transition-all duration-200 shadow-lg hover:shadow-xl ${!isWithinBusinessHours ? "opacity-60 cursor-not-allowed" : ""}`}
+                        className={`font-semibold ${!isWithinBusinessHours ? "opacity-60 cursor-not-allowed" : "dark:shadow-fire"}`}
                         disabled={!isWithinBusinessHours}
+                        size="lg"
                       >
                         {isWithinBusinessHours ? (
-                          <Link to="/sales/new" className="flex items-center text-white">
-                            <Plus className="mr-2 h-4 w-4" />
+                          <Link to="/sales/new" className="flex items-center">
+                            <Plus className="mr-2 h-5 w-5" />
                             Nueva Venta
                           </Link>
                         ) : (
-                          <span className="flex items-center text-white">
-                            <Clock className="mr-2 h-4 w-4" />
+                          <span className="flex items-center">
+                            <Clock className="mr-2 h-5 w-5" />
                             Nueva Venta
                           </span>
                         )}
@@ -549,32 +550,32 @@ const SalesPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="bg-card/50 border-border/20 backdrop-blur-sm">
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-semibold bg-gradient-to-r from-fire-600 via-ember-600 to-blue-600 dark:from-fire-400 dark:via-ember-400 dark:to-blue-400 bg-clip-text text-transparent">
+              <CardTitle className="text-xl font-heading font-bold text-foreground">
                 Historial de Ventas
               </CardTitle>
               <CardDescription>Registro de todas las ventas realizadas</CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
+              <div className="flex flex-col md:flex-row items-center gap-4 mb-8">
                 <div className="relative flex-1 w-full">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="search"
                     placeholder="Buscar por serie, correlativo, ID, cliente o observaciones..."
-                    className="h-11 pl-10 bg-background/50 border-border/20 rounded-xl"
+                    className="pl-12"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="w-full md:w-auto flex items-center gap-2 bg-background/50 border border-border/20 rounded-xl px-4 py-2.5">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div className="w-full md:w-auto flex items-center gap-3 bg-muted/30 border border-border rounded-xl px-4 py-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                   <Input
                     type="date"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
-                    className="border-0 bg-transparent p-0 focus:ring-0 focus:outline-none text-sm font-medium"
+                    className="border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm font-medium w-auto"
                   />
                 </div>
               </div>
@@ -582,54 +583,54 @@ const SalesPage = () => {
               {/* Resumen de ventas */}
               {filteredSales && filteredSales.length > 0 && (
                 <motion.div
-                  className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
+                  className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="bg-gradient-to-br from-blue-50 to-ember-50 dark:from-blue-900/20 dark:to-ember-900/20 p-4 rounded-xl border border-blue-200/50 dark:border-blue-800/30 text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className="bg-card p-6 rounded-2xl border border-border shadow-sm hover:shadow-md dark:shadow-ember transition-all duration-200 text-center">
+                    <div className="text-3xl font-heading font-bold text-primary mb-2">
                       {calculateSalesTotals.cantidadVentas}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <div className="text-sm text-muted-foreground font-medium">
                       {dateFilter ? "Ventas del día" : "Total de ventas"}
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/30 text-center">
-                    <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                  <div className="bg-card p-6 rounded-2xl border border-border shadow-sm hover:shadow-md dark:shadow-ember transition-all duration-200 text-center">
+                    <div className="text-3xl font-heading font-bold text-foreground mb-2">
                       {formatCurrency(calculateSalesTotals.totalGeneral)}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total general</div>
+                    <div className="text-sm text-muted-foreground font-medium">Total general</div>
                   </div>
-                  <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 p-4 rounded-xl border border-red-200/50 dark:border-red-800/30 text-center">
-                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  <div className="bg-card p-6 rounded-2xl border border-border shadow-sm hover:shadow-md dark:shadow-ember transition-all duration-200 text-center">
+                    <div className="text-3xl font-heading font-bold text-destructive mb-2">
                       -{formatCurrency(calculateSalesTotals.totalDescuentos)}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total descuentos</div>
+                    <div className="text-sm text-muted-foreground font-medium">Total descuentos</div>
                   </div>
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-xl border border-green-200/50 dark:border-green-800/30 text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <div className="bg-card p-6 rounded-2xl border border-border shadow-sm hover:shadow-md dark:shadow-ember transition-all duration-200 text-center">
+                    <div className="text-3xl font-heading font-bold text-green-600 dark:text-green-400 mb-2">
                       {formatCurrency(calculateSalesTotals.totalConDescuentos)}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Total final</div>
+                    <div className="text-sm text-muted-foreground font-medium">Total final</div>
                   </div>
                 </motion.div>
               )}
 
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-16">
+                <div className="flex flex-col items-center justify-center py-20">
                   <div className="relative">
-                    <div className="w-16 h-16 border-4 border-fire-200 dark:border-fire-800 rounded-full animate-spin"></div>
-                    <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-fire-600 dark:border-t-fire-400 rounded-full animate-spin"></div>
+                    <div className="w-20 h-20 border-4 border-primary/20 rounded-full animate-spin"></div>
+                    <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
                   </div>
-                  <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">Cargando ventas...</p>
+                  <p className="mt-6 text-muted-foreground font-medium text-lg">Cargando ventas...</p>
                 </div>
               ) : filteredSales && filteredSales.length > 0 ? (
                 <>
-                  <div className="rounded-xl border border-border/20 overflow-hidden bg-card/50 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-border overflow-hidden bg-card shadow-sm">
                     <Table className="w-full">
                       <TableHeader>
-                        <TableRow className="border-border/20 bg-muted/50">
+                        <TableRow className="border-border bg-muted/80">
                           <TableHead className="font-semibold py-4 text-center w-20">ID</TableHead>
                           <TableHead className="font-semibold py-4 text-center w-32">Fecha</TableHead>
                           <TableHead className="font-semibold py-4 text-center min-w-48">Cliente</TableHead>
@@ -645,9 +646,9 @@ const SalesPage = () => {
                         {paginatedSales.map((sale) => (
                           <TableRow
                             key={sale.venta_id}
-                            className="border-border/20 hover:bg-muted/50 transition-all duration-200"
+                            className="border-border hover:bg-muted/30 transition-all duration-200"
                           >
-                            <TableCell className="font-bold text-fire-600 dark:text-fire-400 py-4 text-center">
+                            <TableCell className="font-bold text-primary py-4 text-center">
                               #{sale.venta_id}
                             </TableCell>
                             <TableCell className="text-gray-700 dark:text-gray-300 py-4 text-center text-sm">
@@ -777,19 +778,19 @@ const SalesPage = () => {
                   {/* Paginación moderna */}
                   {filteredSales && filteredSales.length > 0 && (
                     <motion.div
-                      className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-gray-200/50 dark:border-gray-700/50 gap-4"
+                      className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border gap-4"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: 0.1 }}
                     >
-                      <div className="text-sm text-gray-600 dark:text-gray-400 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+                      <div className="text-sm text-muted-foreground bg-muted/50 px-5 py-2.5 rounded-xl border border-border shadow-sm font-medium">
                         Mostrando{" "}
-                        <span className="font-semibold text-fire-600 dark:text-fire-400">
+                        <span className="font-bold text-primary">
                           {(currentPage - 1) * itemsPerPage + 1}-
                           {Math.min(currentPage * itemsPerPage, filteredSales.length)}
                         </span>{" "}
                         de{" "}
-                        <span className="font-semibold text-fire-600 dark:text-fire-400">
+                        <span className="font-bold text-primary">
                           {filteredSales.length}
                         </span>{" "}
                         ventas
@@ -801,7 +802,7 @@ const SalesPage = () => {
                           size="sm"
                           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                           disabled={currentPage === 1}
-                          className="h-10 px-4 bg-card/50 backdrop-blur-sm border-border/20 hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md rounded-xl font-medium"
+                          className="h-10 px-4"
                         >
                           <ChevronLeft className="h-4 w-4 mr-1" />
                           Anterior
@@ -817,10 +818,10 @@ const SalesPage = () => {
                                 variant={isActive ? "default" : "outline"}
                                 size="sm"
                                 onClick={() => setCurrentPage(pageNum)}
-                                className={`h-10 w-10 p-0 transition-all duration-200 shadow-sm rounded-xl font-medium ${
+                                className={`h-10 w-10 p-0 font-semibold ${
                                   isActive
-                                    ? "bg-gradient-to-r from-fire-600 to-ember-600 text-white border-fire-600 shadow-md hover:shadow-lg transform hover:scale-105"
-                                    : "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200/50 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-fire-50 hover:to-ember-50 hover:border-fire-200 dark:hover:from-fire-900/30 dark:hover:to-ember-900/30 dark:hover:border-fire-700 hover:shadow-md"
+                                    ? "shadow-lg dark:shadow-fire"
+                                    : ""
                                 }`}
                               >
                                 {pageNum}
@@ -834,7 +835,7 @@ const SalesPage = () => {
                           size="sm"
                           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                           disabled={currentPage === totalPages}
-                          className="h-10 px-4 bg-card/50 backdrop-blur-sm border-border/20 hover:bg-accent/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md rounded-xl font-medium"
+                          className="h-10 px-4"
                         >
                           Siguiente
                           <ChevronRight className="h-4 w-4 ml-1" />
@@ -845,16 +846,16 @@ const SalesPage = () => {
                 </>
               ) : (
                 <motion.div
-                  className="flex flex-col items-center justify-center py-20 text-center"
+                  className="flex flex-col items-center justify-center py-24 text-center"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="bg-gradient-to-br from-fire-100 to-ember-100 dark:from-fire-900/30 dark:to-ember-900/30 p-8 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-8 shadow-lg">
-                    <ShoppingCart className="h-16 w-16 text-fire-500 dark:text-fire-400" />
+                  <div className="bg-primary/10 p-12 rounded-full w-40 h-40 flex items-center justify-center mx-auto mb-8 shadow-md dark:shadow-ember">
+                    <ShoppingCart className="h-20 w-20 text-primary" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">No hay ventas registradas</h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+                  <h3 className="text-2xl font-heading font-bold text-foreground mb-4">No hay ventas registradas</h3>
+                  <p className="text-muted-foreground text-base max-w-md mx-auto leading-relaxed">
                     {searchTerm || dateFilter
                       ? "No se encontraron ventas que coincidan con los criterios de búsqueda especificados"
                       : "Aún no se han registrado ventas. Comienza a registrar tus primeras transacciones"}
@@ -866,7 +867,7 @@ const SalesPage = () => {
                         setSearchTerm("")
                         setDateFilter("")
                       }}
-                      className="mt-6 bg-card/50 backdrop-blur-sm hover:bg-accent/50 border-border/20 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="mt-8"
                     >
                       Limpiar filtros
                     </Button>
@@ -882,54 +883,54 @@ const SalesPage = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-red-600 dark:text-red-400 flex items-center gap-2">
+            <DialogTitle className="text-xl font-heading font-bold text-destructive flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
               Eliminar Venta
             </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
+            <DialogDescription>
               Esta acción no se puede deshacer. ¿Está seguro de que desea continuar?
             </DialogDescription>
           </DialogHeader>
           
           {saleToDelete && (
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 my-4">
-              <div className="space-y-2">
+            <div className="bg-muted/50 rounded-xl p-5 my-4 border border-border">
+              <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Venta ID:</span>
-                  <span className="font-semibold text-fire-600 dark:text-fire-400">
+                  <span className="text-sm text-muted-foreground font-medium">Venta ID:</span>
+                  <span className="font-bold text-primary">
                     #{saleToDelete.venta_id}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Fecha:</span>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">Fecha:</span>
+                  <span className="text-sm font-medium text-foreground">
                     {formatDateTime(saleToDelete.fecha)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                  <span className="text-sm text-muted-foreground font-medium">Total:</span>
+                  <span className="text-sm font-bold text-green-600 dark:text-green-400">
                     {formatCurrency(Number.parseFloat(saleToDelete.total_con_igv))}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Método de Pago:</span>
-                  <span className="text-sm font-medium capitalize">
+                  <span className="text-sm text-muted-foreground font-medium">Método de Pago:</span>
+                  <span className="text-sm font-medium text-foreground capitalize">
                     {saleToDelete.metodo_pago}
                   </span>
                 </div>
               </div>
-              
-              <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                <div className="flex items-start gap-2">
-                  <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-white text-xs font-bold">!</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
                       Restauración de inventario
                     </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-2 leading-relaxed">
                       Se restaurará el stock del producto, pero deberá ajustar manualmente los códigos de barras en la sección de productos para mantener la consistencia del inventario.
                     </p>
                   </div>

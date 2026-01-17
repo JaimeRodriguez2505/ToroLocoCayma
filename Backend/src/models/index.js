@@ -113,6 +113,7 @@ const LibroReclamaciones = require("./libro_reclamaciones.model");
 const CarritoGuardado = require("./carrito_guardado.model");
 const Comanda = require("./comanda.model");
 const GastoPersonal = require("./gasto_personal.model");
+const Reserva = require("./reserva.model");
 
 // Relación con User COMPLETAMENTE REMOVIDA
 
@@ -133,6 +134,16 @@ async function syncComandas() {
     console.log('Tabla comandas sincronizada correctamente');
   } catch (error) {
     console.error('Error al sincronizar tabla comandas:', error);
+  }
+}
+
+// Función para sincronizar la tabla de reservas
+async function syncReservas() {
+  try {
+    await Reserva.sync({ force: false });
+    console.log('Tabla reservas sincronizada correctamente');
+  } catch (error) {
+    console.error('Error al sincronizar tabla reservas:', error);
   }
 }
 
@@ -190,7 +201,9 @@ module.exports = {
   CarritoGuardado,
   Comanda,
   GastoPersonal,
+  Reserva,
   seedRoles,
   syncCarritosGuardados,
   syncComandas,
+  syncReservas,
 }

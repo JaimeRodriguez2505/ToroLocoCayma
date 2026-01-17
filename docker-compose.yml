@@ -9,11 +9,14 @@ services:
       - ./Backend/.env
     environment:
       - TZ=America/Lima
+      - DB_HOST=db
     ports:
-      - "3000:3000"
+      - "4240:3000"
+      - "4241:3000"
     depends_on:
       - db
     volumes:
+      - ./Backend/src:/app/src
       - ./Backend/src/uploads:/app/src/uploads
     networks:
       - tiktendry-net
@@ -29,9 +32,18 @@ services:
       MYSQL_PASSWORD: tiktendry
       TZ: America/Lima
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - tiktendry-net
+
+  redis:
+    image: redis:alpine
+    container_name: tiktendry-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
     networks:
       - tiktendry-net
 
@@ -44,7 +56,26 @@ services:
     environment:
       - TZ=America/Lima
     ports:
-      - "8080:80"
+      - "4242:80"
+    depends_on:
+      - backend
+    networks:
+      - tiktendry-net
+
+  landing:
+    build:
+      context: ./landing
+      dockerfile: Dockerfile
+    container_name: tiktendry-landing
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - BACKEND_URL=http://backend:3000
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:4241
+    ports:
+      - "4243:3000"
     depends_on:
       - backend
     networks:
@@ -62,7 +93,7 @@ services:
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_TIMEZONE=America/Lima
-      - APP_URL=http://localhost:8000
+      - APP_URL=http://localhost:4244
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
@@ -70,15 +101,19 @@ services:
       - DB_USERNAME=tiktendry
       - DB_PASSWORD=tiktendry
       - LOG_LEVEL=error
-      - SESSION_DRIVER=database
-      - CACHE_STORE=database
-      - QUEUE_CONNECTION=database
+      - SESSION_DRIVER=redis
+      - CACHE_STORE=redis
+      - QUEUE_CONNECTION=redis
+      - REDIS_HOST=redis
     volumes:
       - ./Factura:/var/www/html
       - ./Backend/src/uploads/certs:/var/www/html/src/uploads/certs
       - ./Backend/src/uploads/logos:/var/www/html/src/uploads/logos
+    ports:
+      - "9070:9000"
     depends_on:
       - db
+      - redis
     networks:
       - tiktendry-net
 
@@ -91,13 +126,23 @@ services:
     environment:
       - TZ=America/Lima
     ports:
-      - "8000:80"
+      - "4244:80"
     depends_on:
       - factura-php
     volumes:
       - ./Factura:/var/www/html
       - ./Backend/src/uploads/certs:/var/www/html/src/uploads/certs
       - ./Backend/src/uploads/logos:/var/www/html/src/uploads/logos
+    networks:
+      - tiktendry-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: tiktendry-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
     networks:
       - tiktendry-net
 

@@ -1,25 +1,26 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { 
-  Search, 
-  ShoppingCart, 
-  CreditCard, 
-  ArrowLeft, 
-  Plus, 
-  Minus, 
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Search,
+  ShoppingCart,
+  CreditCard,
+  ArrowLeft,
+  Plus,
+  Minus,
   Table,
   Package,
   QrCode,
   Users,
   X,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { Input } from '../ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
-import { Card, CardContent } from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import MobileTableSelector from './MobileTableSelector'
 
 interface Product {
@@ -57,7 +58,6 @@ interface Table {
   }
 }
 
-// Tipo mínimo para datos de cliente usados en el layout
 interface ClienteDataMin {
   razonSocial?: string
   nombre?: string
@@ -69,48 +69,41 @@ interface ClienteDataMin {
 }
 
 interface ImprovedMobileSalesLayoutProps {
-  // Props para productos
   products: Product[]
   isLoadingProducts: boolean
   productSearchTerm: string
   setProductSearchTerm: (term: string) => void
   onAddToCart: (product: Product) => void
-  
-  // Props para carrito
+
   cart: CartItem[]
   onUpdateQuantity: (productId: number, newQuantity: number) => void
   onRemoveFromCart: (productId: number) => void
-  
-  // Props para mesas
+
   tables: Table[]
   selectedTable?: Table
   onSelectTable: (table: Table) => void
   onSaveTable: () => void
   onCancelTableSelection: () => void
-  
-  // Props para configuración
+
   metodoPago: string
   setMetodoPago: (metodo: string) => void
   observaciones: string
   setObservaciones: (obs: string) => void
   autoPrintComanda: boolean
   setAutoPrintComanda: (val: boolean) => void
-  
-  // Props para acciones
-  onCompleteSale: () => void
+
   onOpenBarcodeScanner: () => void
   onBack: () => void
-  
-  // Estados
+
   total: number
   totalItems: number
   isProcessingSale: boolean
-  // NUEVOS PROPS PARA DOC Y EFECTIVO
+
   tipoDocumento: string
   setTipoDocumento: (doc: string) => void
   montoRecibido: string
   setMontoRecibido: (val: string) => void
-  // Nuevos props para usuario y cliente
+
   userName?: string | null
   clienteData?: ClienteDataMin | null
   onOpenClienteDialog: () => void
@@ -136,18 +129,15 @@ export const ImprovedMobileSalesLayout: React.FC<ImprovedMobileSalesLayoutProps>
   setObservaciones,
   autoPrintComanda,
   setAutoPrintComanda,
-  // onCompleteSale, // ya no se usa en mobile: se reemplazó por onSaveTable
   onOpenBarcodeScanner,
   onBack,
   total,
   totalItems,
   isProcessingSale,
-  // nuevos props
   tipoDocumento,
   setTipoDocumento,
   montoRecibido,
   setMontoRecibido,
-  // Nuevos props para usuario y cliente
   userName,
   clienteData,
   onOpenClienteDialog,
@@ -155,7 +145,6 @@ export const ImprovedMobileSalesLayout: React.FC<ImprovedMobileSalesLayoutProps>
   const [activeTab, setActiveTab] = useState('products')
   const [showTableSelector, setShowTableSelector] = useState(false)
 
-  // Filtrar productos por búsqueda
   const filteredProducts = products.filter(product =>
     product.nombre?.toLowerCase().includes(productSearchTerm.toLowerCase())
   )
@@ -165,7 +154,6 @@ export const ImprovedMobileSalesLayout: React.FC<ImprovedMobileSalesLayoutProps>
     setShowTableSelector(false)
   }
 
-  // Helper para mostrar nombre del cliente
   const getClienteNombre = () => {
     if (!clienteData) return 'CLIENTE GENERAL'
     if (tipoDocumento === '01') return clienteData.razonSocial || 'CLIENTE'
@@ -174,54 +162,47 @@ export const ImprovedMobileSalesLayout: React.FC<ImprovedMobileSalesLayoutProps>
     )
   }
 
-  // Helper para mostrar número de documento
   const getClienteNumeroDoc = () => {
     return clienteData?.numeroDocumento || '—'
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Header fijo con información de mesa */}
-      <div className="bg-gradient-to-r from-fire-600 to-ember-600 text-white p-4 shadow-lg fire-glow">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header 2026 - Limpio y minimalista */}
+      <div className="bg-card border-b-2 border-border p-4 shadow-sm dark:shadow-ember">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onBack}
-              className="text-white hover:bg-white/20 p-2 h-8 w-8"
+              className="h-10 w-10"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-            
-            <div 
-              className="cursor-pointer tap-effect flex items-center space-x-2"
+
+            <div
+              className="cursor-pointer flex items-center gap-3 tap-target"
               onClick={() => setShowTableSelector(true)}
             >
               {selectedTable ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <Users className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-xl flex items-center justify-center border-2 border-primary">
+                    <Users className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold">Mesa {selectedTable.number}</h1>
-                    <p className="text-xs text-white/80">{totalItems} productos</p>
-                    {userName && (
-                      <p className="text-[10px] text-white/80">Vendedor: {userName}</p>
-                    )}
+                    <h1 className="text-xl font-bold text-foreground">Mesa {selectedTable.number}</h1>
+                    <p className="text-sm text-muted-foreground">{totalItems} productos</p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <Plus className="h-5 w-5" />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center border-2 border-border">
+                    <Plus className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold">Seleccionar Mesa</h1>
-                    <p className="text-xs text-white/80">Toca para elegir</p>
-                    {userName && (
-                      <p className="text-[10px] text-white/80">Vendedor: {userName}</p>
-                    )}
+                    <h1 className="text-xl font-bold text-foreground">Seleccionar Mesa</h1>
+                    <p className="text-sm text-muted-foreground">Toca para elegir</p>
                   </div>
                 </div>
               )}
@@ -229,447 +210,479 @@ export const ImprovedMobileSalesLayout: React.FC<ImprovedMobileSalesLayoutProps>
           </div>
 
           <div className="text-right">
-            <p className="text-2xl font-bold">S/ {total.toFixed(2)}</p>
-            <p className="text-xs text-white/80">{totalItems} items</p>
+            <p className="text-2xl font-bold text-primary">S/ {total.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">{totalItems} items</p>
           </div>
         </div>
 
-        {/* Acciones de mesa y opción de imprimir comanda (solo si hay mesa seleccionada) */}
-        {selectedTable && (
-          <div className="mt-3 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+        {/* Acciones de mesa */}
+        {selectedTable && cart.length > 0 && (
+          <div className="flex flex-col gap-2 pt-3 border-t border-border">
+            <div className="flex gap-2">
               <Button
                 onClick={onSaveTable}
-                disabled={cart.length === 0}
-                className="h-10 flex-1 btn-ember"
+                className="h-12 flex-1 font-semibold"
+                variant="default"
               >
-                <Check className="h-4 w-4 mr-2" />
-                Guardar en Mesa {selectedTable.number}
+                <Check className="h-5 w-5 mr-2" />
+                Guardar Mesa {selectedTable.number}
               </Button>
               <Button
                 variant="outline"
                 onClick={onCancelTableSelection}
-                className="h-10 flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20"
+                className="h-12 px-4"
               >
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
+                <X className="h-5 w-5" />
               </Button>
             </div>
 
-            <label className="flex items-center gap-2 text-white/90">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input
                 type="checkbox"
                 checked={autoPrintComanda}
                 onChange={(e) => setAutoPrintComanda(e.target.checked)}
-                className="w-4 h-4 rounded"
+                className="w-5 h-5 rounded border-border"
               />
-              <span className="text-xs">Imprimir comanda automáticamente</span>
+              <span>Imprimir comanda automáticamente</span>
             </label>
           </div>
         )}
+
+        {userName && (
+          <p className="text-xs text-muted-foreground mt-2">Vendedor: {userName}</p>
+        )}
       </div>
 
-      {/* Tabs de navegación */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 border-b">
-          <TabsTrigger value="products" className="flex items-center space-x-2">
-            <Package className="h-4 w-4" />
-            <span>Productos</span>
+      {/* Tabs 2026 */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+        <TabsList className="grid w-full grid-cols-3 bg-muted m-0 rounded-none h-14 border-b border-border">
+          <TabsTrigger value="products" className="flex items-center gap-2 h-full text-base">
+            <Package className="h-5 w-5" />
+            <span className="hidden sm:inline">Productos</span>
           </TabsTrigger>
-          <TabsTrigger value="cart" className="flex items-center space-x-2 relative">
-            <ShoppingCart className="h-4 w-4" />
-            <span>Carrito</span>
+          <TabsTrigger value="cart" className="flex items-center gap-2 h-full text-base relative">
+            <ShoppingCart className="h-5 w-5" />
+            <span className="hidden sm:inline">Carrito</span>
             {totalItems > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs bg-fire-600">
+              <Badge className="absolute -top-1 -right-1 h-6 w-6 p-0 text-xs flex items-center justify-center bg-primary">
                 {totalItems}
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="checkout" className="flex items-center space-x-2">
-            <CreditCard className="h-4 w-4" />
-            <span>Pagar</span>
+          <TabsTrigger value="checkout" className="flex items-center gap-2 h-full text-base">
+            <CreditCard className="h-5 w-5" />
+            <span className="hidden sm:inline">Pagar</span>
           </TabsTrigger>
         </TabsList>
 
-        {/* Contenido de productos */}
-        <TabsContent value="products" className="flex-1 p-4 overflow-hidden pb-24">
-          <div className="flex flex-col h-full">
-            {/* Barra de búsqueda */}
-            <div className="flex space-x-2 mb-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar productos..."
-                  value={productSearchTerm}
-                  onChange={(e) => setProductSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={onOpenBarcodeScanner}
-                className="h-12 px-3"
-              >
-                <QrCode className="h-5 w-5" />
-              </Button>
+        {/* TAB: Productos */}
+        <TabsContent value="products" className="flex-1 p-4 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col pb-28">
+          <div className="flex gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Input
+                placeholder="Buscar productos..."
+                value={productSearchTerm}
+                onChange={(e) => setProductSearchTerm(e.target.value)}
+                className="pl-12 h-14 text-base"
+              />
             </div>
-
-            {/* Grid de productos */}
-            <div className="flex-1 overflow-y-auto">
-              {isLoadingProducts ? (
-                <div className="grid grid-cols-2 gap-3">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-4 animate-pulse">
-                      <div className="bg-gray-200 dark:bg-gray-700 h-20 rounded-lg mb-3" />
-                      <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-2" />
-                      <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded w-2/3" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {filteredProducts.map((product) => (
-                    <motion.div
-                      key={product.id_producto}
-                      whileTap={{ scale: 0.95 }}
-                      className="bg-fire-500 hover:bg-fire-600 text-white fire-glow transition-all duration-300 rounded-xl p-4 shadow-sm border border-fire-400 touch-manipulation"
-                      onClick={() => onAddToCart(product)}
-                    >
-                      <div className="aspect-square bg-charcoal-200 dark:bg-charcoal-800 rounded-lg mb-3 flex items-center justify-center charcoal-texture">
-                        {product.imagen_url ? (
-                          <img 
-                            src={product.imagen_url} 
-                            alt={product.nombre}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <Package className="h-8 w-8 text-charcoal-400" />
-                        )}
-                      </div>
-                      
-                      <h3 className="font-semibold text-white mb-1 text-sm leading-tight">
-                        {product.nombre}
-                      </h3>
-                      
-                      <p className="text-fire-100 font-bold text-lg mb-3">
-                        S/ {parseFloat(product.precio_unitario_con_igv).toFixed(2)}
-                      </p>
-                      
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAddToCart(product);
-                        }}
-                        className="w-full btn-ember active:scale-95 active:opacity-80"
-                        size="sm"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar
-                      </Button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {!isLoadingProducts && filteredProducts.length === 0 && (
-                <div className="text-center py-12">
-                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No se encontraron productos
-                  </p>
-                </div>
-              )}
-            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onOpenBarcodeScanner}
+              className="h-14 w-14"
+            >
+              <QrCode className="h-6 w-6" />
+            </Button>
           </div>
-        </TabsContent>
 
-        {/* Contenido del carrito */}
-        <TabsContent value="cart" className="flex-1 p-4 overflow-hidden pb-24">
-          <div className="flex flex-col h-full">
-            {cart.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500 dark:text-gray-400 text-lg">
-                    El carrito está vacío
-                  </p>
-                  <p className="text-gray-400 text-sm mt-2">
-                    Agrega productos desde la pestaña de productos
-                  </p>
-                </div>
+          {/* Grid de productos - MÁS GRANDE Y TÁCTIL */}
+          <div className="flex-1 overflow-y-auto">
+            {isLoadingProducts ? (
+              <div className="grid grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <div className="bg-muted h-32 animate-pulse" />
+                    <CardContent className="p-4">
+                      <div className="bg-muted h-4 rounded mb-2 animate-pulse" />
+                      <div className="bg-muted h-4 rounded w-2/3 animate-pulse" />
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto space-y-3">
-                {cart.map((item) => (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredProducts.map((product) => (
                   <motion.div
-                    key={item.producto_id}
-                    layout
-                    className="bg-charcoal-50 dark:bg-charcoal-900 rounded-xl p-4 shadow-sm border border-charcoal-200 dark:border-charcoal-700 charcoal-texture"
+                    key={product.id_producto}
+                    whileTap={{ scale: 0.97 }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-charcoal-900 dark:text-charcoal-100 mb-1">
-                          {item.nombre}
+                    <Card
+                      className="overflow-hidden cursor-pointer hover:border-primary/50 transition-all active:bg-accent"
+                      onClick={() => onAddToCart(product)}
+                    >
+                      <div className="aspect-square bg-muted flex items-center justify-center relative overflow-hidden">
+                        {product.imagen_url ? (
+                          <img
+                            src={product.imagen_url}
+                            alt={product.nombre}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package className="h-12 w-12 text-muted-foreground" />
+                        )}
+                        {product.stock !== undefined && product.stock <= 5 && (
+                          <Badge className="absolute top-2 right-2 bg-destructive">
+                            Stock: {product.stock}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <CardContent className="p-4">
+                        <h3 className="font-semibold text-sm leading-tight mb-2 line-clamp-2">
+                          {product.nombre}
                         </h3>
-                        <p className="text-ember-600 font-bold">
-                          S/ {parseFloat(item.precio_unitario_con_igv).toFixed(2)} c/u
+
+                        <p className="text-primary font-bold text-xl mb-3">
+                          S/ {parseFloat(product.precio_unitario_con_igv).toFixed(2)}
                         </p>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onUpdateQuantity(item.producto_id, Math.max(0, item.cantidad - 1));
-                            }}
-                            className="h-8 w-8 p-0 active:scale-95 active:bg-gray-200 dark:active:bg-gray-600"
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          
-                          <span className="font-bold text-lg min-w-[2rem] text-center">
-                            {item.cantidad}
-                          </span>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onUpdateQuantity(item.producto_id, item.cantidad + 1);
-                            }}
-                            className="h-8 w-8 p-0 active:scale-95 active:bg-gray-200 dark:active:bg-gray-600"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        
+
                         <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onRemoveFromCart(item.producto_id);
-                            }}
-                            className="h-8 w-8 p-0 text-ember-600 hover:text-ember-800 hover:bg-ember-50 active:scale-95 active:bg-ember-100"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                      <p className="text-right font-bold text-lg">
-                        Subtotal: S/ {item.subtotal.toFixed(2)}
-                      </p>
-                    </div>
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddToCart(product);
+                          }}
+                          className="w-full h-10"
+                          size="sm"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Agregar
+                        </Button>
+                      </CardContent>
+                    </Card>
                   </motion.div>
                 ))}
+              </div>
+            )}
+
+            {!isLoadingProducts && filteredProducts.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <Package className="h-16 w-16 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-lg">
+                  No se encontraron productos
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Intenta con otra búsqueda
+                </p>
               </div>
             )}
           </div>
         </TabsContent>
 
-        {/* Contenido de checkout */}
-        <TabsContent value="checkout" className="flex-1 p-4 overflow-hidden">
-          <div className="flex flex-col h-full">
-            <div className="flex-1 space-y-4">
-              {/* Tipo de Documento */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3">Tipo de Documento</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: 'Ticket', value: '' },
-                      { label: 'Boleta', value: '03' },
-                      { label: 'Factura', value: '01' },
-                    ].map((doc) => (
-                      <Button
-                        key={doc.value}
-                        variant={tipoDocumento === doc.value ? 'default' : 'outline'}
-                        onClick={() => {
-                          setTipoDocumento(doc.value)
-                          if (doc.value === '01' || doc.value === '03') {
-                            onOpenClienteDialog()
-                          }
-                        }}
-                        className="h-12"
-                      >
-                        {doc.label}
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+        {/* TAB: Carrito */}
+        <TabsContent value="cart" className="flex-1 p-4 overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col pb-28">
+          {cart.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">
+                  Carrito vacío
+                </h3>
+                <p className="text-muted-foreground">
+                  Agrega productos desde la pestaña de productos
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {cart.map((item) => (
+                <motion.div
+                  key={item.producto_id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                >
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 pr-3">
+                          <h3 className="font-semibold text-base leading-tight mb-1">
+                            {item.nombre}
+                          </h3>
+                          <p className="text-primary font-bold text-lg">
+                            S/ {parseFloat(item.precio_unitario_con_igv).toFixed(2)} c/u
+                          </p>
+                        </div>
 
-              {/* Cliente */}
-              {(tipoDocumento === '01' || tipoDocumento === '03') && (
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="font-semibold mb-1">Cliente</h3>
-                        <p className="font-medium leading-tight">{getClienteNombre()}</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {tipoDocumento === '01' ? 'RUC' : 'DNI'}: <span className="text-gray-900 dark:text-gray-100 font-medium">{getClienteNumeroDoc()}</span>
-                        </p>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onRemoveFromCart(item.producto_id)}
+                          className="h-10 w-10 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
                       </div>
-                      <Button variant="outline" onClick={onOpenClienteDialog} className="h-10">
-                        Buscar/Cambiar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
-              {/* Método de pago */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border">
+                        <div className="flex items-center gap-2 bg-muted rounded-xl p-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onUpdateQuantity(item.producto_id, Math.max(0, item.cantidad - 1))}
+                            className="h-12 w-12"
+                          >
+                            <Minus className="h-5 w-5" />
+                          </Button>
+
+                          <span className="font-bold text-2xl min-w-[3rem] text-center">
+                            {item.cantidad}
+                          </span>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onUpdateQuantity(item.producto_id, item.cantidad + 1)}
+                            className="h-12 w-12"
+                          >
+                            <Plus className="h-5 w-5" />
+                          </Button>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground mb-1">Subtotal</p>
+                          <p className="font-bold text-2xl text-primary">
+                            S/ {item.subtotal.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* TAB: Pagar */}
+        <TabsContent value="checkout" className="flex-1 p-4 overflow-y-auto m-0 pb-6">
+          <div className="space-y-4 max-w-2xl mx-auto">
+            {/* Tipo de Documento */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Tipo de Documento</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-3 gap-2">
+                {[
+                  { label: 'Ticket', value: '' },
+                  { label: 'Boleta', value: '03' },
+                  { label: 'Factura', value: '01' },
+                ].map((doc) => (
+                  <Button
+                    key={doc.value}
+                    variant={tipoDocumento === doc.value ? 'default' : 'outline'}
+                    onClick={() => {
+                      setTipoDocumento(doc.value)
+                      if (doc.value === '01' || doc.value === '03') {
+                        onOpenClienteDialog()
+                      }
+                    }}
+                    className="h-14 text-base font-semibold"
+                  >
+                    {doc.label}
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Cliente */}
+            {(tipoDocumento === '01' || tipoDocumento === '03') && (
               <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3">Método de Pago</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['efectivo', 'tarjeta', 'yape', 'plin', 'transferencia'].map((metodo) => (
-                      <Button
-                        key={metodo}
-                        variant={metodoPago === metodo ? 'default' : 'outline'}
-                        onClick={() => setMetodoPago(metodo)}
-                        className="h-12 capitalize"
-                      >
-                        {metodo}
-                      </Button>
-                    ))}
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Cliente</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex-1">
+                      <p className="font-semibold text-base leading-tight mb-1">{getClienteNombre()}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {tipoDocumento === '01' ? 'RUC' : 'DNI'}: {getClienteNumeroDoc()}
+                      </p>
+                    </div>
+                    <Button variant="outline" onClick={onOpenClienteDialog} className="h-10">
+                      Cambiar
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Monto recibido (solo efectivo) */}
-              {metodoPago === 'efectivo' && (
-                <Card>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-3">Monto Recibido</h3>
-                    <div className="space-y-2">
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="Ingrese monto recibido"
-                        className="w-full h-12 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                        value={montoRecibido}
-                        onChange={(e) => setMontoRecibido(e.target.value)}
-                      />
-                      {montoRecibido && !isNaN(parseFloat(montoRecibido)) && (
-                        parseFloat(montoRecibido) >= total ? (
-                          <div className="flex justify-between text-emerald-600 font-semibold">
-                            <span>Vuelto</span>
-                            <span>S/ {(Math.max(0, parseFloat(montoRecibido) - total)).toFixed(2)}</span>
-                          </div>
-                        ) : (
-                          <div className="flex justify-between text-red-600 font-semibold">
-                            <span>Falta</span>
-                            <span>S/ {(Math.max(0, total - parseFloat(montoRecibido))).toFixed(2)}</span>
-                          </div>
-                        )
+            {/* Método de pago */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Método de Pago</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-2">
+                {['efectivo', 'tarjeta', 'yape', 'plin', 'transferencia'].map((metodo) => (
+                  <Button
+                    key={metodo}
+                    variant={metodoPago === metodo ? 'default' : 'outline'}
+                    onClick={() => setMetodoPago(metodo)}
+                    className="h-14 text-base font-semibold capitalize"
+                  >
+                    {metodo}
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Monto recibido (solo efectivo) */}
+            {metodoPago === 'efectivo' && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Monto Recibido</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="S/ 0.00"
+                    value={montoRecibido}
+                    onChange={(e) => setMontoRecibido(e.target.value)}
+                    inputSize="lg"
+                    className="text-xl font-bold"
+                  />
+                  {montoRecibido && !isNaN(parseFloat(montoRecibido)) && (
+                    <div className="p-4 rounded-xl bg-muted">
+                      {parseFloat(montoRecibido) >= total ? (
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-semibold">Vuelto</span>
+                          <span className="text-2xl font-bold text-emerald-600">
+                            S/ {(Math.max(0, parseFloat(montoRecibido) - total)).toFixed(2)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-semibold">Falta</span>
+                          <span className="text-2xl font-bold text-destructive">
+                            S/ {(Math.max(0, total - parseFloat(montoRecibido))).toFixed(2)}
+                          </span>
+                        </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Observaciones */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Observaciones (opcional)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  placeholder="Ej: Sin cebolla, término medio..."
+                  className="w-full h-24 p-4 border-2 border-border rounded-xl resize-none bg-background text-base focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/20 dark:focus:shadow-primary-glow transition-all"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Resumen Total */}
+            <Card className="border-2 border-primary dark:shadow-fire">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Resumen</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between text-base">
+                  <span className="text-muted-foreground">Productos ({totalItems})</span>
+                  <span className="font-semibold">S/ {total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-2xl pt-3 border-t-2 border-border">
+                  <span>Total</span>
+                  <span className="text-primary">S/ {total.toFixed(2)}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Botón de guardar */}
+            <Button
+              onClick={onSaveTable}
+              disabled={cart.length === 0 || isProcessingSale || !selectedTable}
+              className="w-full h-16 text-xl font-bold"
+              size="lg"
+            >
+              {isProcessingSale ? (
+                <>
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mr-3" />
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <Check className="h-6 w-6 mr-2" />
+                  {selectedTable ? `Guardar Mesa ${selectedTable.number}` : 'Selecciona una mesa primero'}
+                </>
               )}
-
-              {/* Observaciones */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3">Observaciones</h3>
-                  <textarea
-                    value={observaciones}
-                    onChange={(e) => setObservaciones(e.target.value)}
-                    placeholder="Notas adicionales..."
-                    className="w-full h-20 p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none bg-white dark:bg-gray-800"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Resumen */}
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-3">Resumen</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Productos ({totalItems})</span>
-                      <span>S/ {total.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                      <span>Total</span>
-                      <span>S/ {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Botón de guardar mesa */}
-            <div className="pt-4">
-              <Button
-                onClick={onSaveTable}
-                disabled={cart.length === 0 || isProcessingSale}
-                className="w-full h-14 text-lg font-semibold btn-fire"
-              >
-                {isProcessingSale ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-5 w-5 mr-2" />
-                    {selectedTable ? `Guardar Mesa ${selectedTable.number}` : 'Guardar Mesa'}
-                  </>
-                )}
-              </Button>
-            </div>
+            </Button>
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Barra de acciones inferior fija para navegación rápida */}
+      {/* Barra inferior fija - REDISEÑADA */}
       {(activeTab === 'products' || activeTab === 'cart') && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur border-t border-gray-200 dark:border-gray-700">
-          <div className="px-4 pb-[max(0px,env(safe-area-inset-bottom))] pt-3 flex items-center gap-3">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t-2 border-border shadow-lg dark:shadow-fire">
+          <div className="px-4 pb-safe pt-4 flex items-center gap-3">
             <Button
               variant="outline"
               onClick={() => setActiveTab('cart')}
-              className="h-12 flex-1"
+              className="h-14 flex-1 relative"
             >
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                <span>Carrito</span>
-                {totalItems > 0 && (
-                  <Badge className="ml-1 bg-fire-600">{totalItems}</Badge>
-                )}
-              </div>
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              <span className="font-semibold">Carrito</span>
+              {totalItems > 0 && (
+                <Badge className="ml-2 bg-primary h-6 min-w-[1.5rem] px-2">
+                  {totalItems}
+                </Badge>
+              )}
             </Button>
             <Button
               onClick={() => setActiveTab('checkout')}
               disabled={totalItems === 0}
-              className="h-12 flex-[2] btn-fire text-base font-semibold"
+              className="h-14 flex-[2] text-lg font-bold"
             >
+              <CreditCard className="h-5 w-5 mr-2" />
               Cobrar • S/ {total.toFixed(2)}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Botón flotante de acceso rápido al selector de mesas */}
-      <div className={`fixed left-4 z-50 ${activeTab === 'products' || activeTab === 'cart' ? 'bottom-24' : 'bottom-6'}`}>
-        <Button
-          onClick={() => setShowTableSelector(true)}
-          className="h-12 px-4 shadow-lg shadow-black/20 btn-ember rounded-full"
-        >
-          <Users className="h-5 w-5 mr-2" />
-          {selectedTable ? `Mesa ${selectedTable.number}` : 'Mesas'}
-        </Button>
-      </div>
+      {/* Botón flotante de mesas - REDISEÑADO */}
+      <AnimatePresence>
+        {(activeTab === 'products' || activeTab === 'cart') && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed right-4 bottom-24 z-50"
+          >
+            <Button
+              onClick={() => setShowTableSelector(true)}
+              size="lg"
+              className="h-14 px-6 shadow-2xl dark:shadow-fire-lg rounded-2xl font-bold"
+            >
+              <Users className="h-5 w-5 mr-2" />
+              {selectedTable ? `Mesa ${selectedTable.number}` : 'Mesas'}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal de selección de mesa */}
       <MobileTableSelector

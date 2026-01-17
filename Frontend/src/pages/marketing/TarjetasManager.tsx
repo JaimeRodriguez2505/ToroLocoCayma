@@ -818,11 +818,14 @@ const TarjetasManager: React.FC = () => {
         <Dialog open={imageModalOpen} onOpenChange={closeImageModal}>
           <DialogContent className="sm:max-w-4xl bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl p-2">
             <DialogHeader className="px-4 pt-4 pb-2">
-              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                Vista previa de la tarjeta
-              </DialogTitle>
-            </DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <ImageIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Vista previa de la tarjeta
+            </DialogTitle>
+            <DialogDescription className="hidden">
+              Vista ampliada de la imagen de la tarjeta promocional
+            </DialogDescription>
+          </DialogHeader>
 
             <div className="px-4 pb-4">
               <div className="relative bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">

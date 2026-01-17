@@ -252,16 +252,17 @@ const CategoriesPage = () => {
       >
         {" "}
         <motion.div
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-card/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-border/20"
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card border border-border rounded-2xl p-6 shadow-sm dark:shadow-ember"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground flex items-center gap-3">
+              <Tags className="h-8 w-8 text-primary" />
               Categorías
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">Gestiona las categorías de tus productos</p>
+            <p className="text-muted-foreground text-base mt-2">Gestiona las categorías de tus productos</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -269,13 +270,13 @@ const CategoriesPage = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
-                      {" "}
                       <Button
-                        className="btn-fire shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                        className="font-semibold dark:shadow-fire"
+                        size="lg"
                         onClick={() => setIsDialogOpen(true)}
                         disabled={user?.id_role === 2 && !isWithinBusinessHours}
                       >
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 h-5 w-5" />
                         Nueva Categoría
                       </Button>
                     </div>
@@ -288,13 +289,13 @@ const CategoriesPage = () => {
                 </Tooltip>
               </TooltipProvider>
             </DialogTrigger>{" "}
-            <DialogContent className="sm:max-w-[500px] bg-card/95 backdrop-blur-sm border border-border/50 shadow-2xl p-0 overflow-hidden">
-              <DialogHeader className="bg-gradient-to-r from-fire-600 via-ember-600 to-ember-700 dark:from-fire-700 dark:via-ember-700 dark:to-ember-800 p-4 text-white">
-                <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-                  <Tags className="h-5 w-5" />
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-heading font-bold flex items-center gap-2">
+                  <Tags className="h-5 w-5 text-primary" />
                   Crear Nueva Categoría
                 </DialogTitle>
-                <DialogDescription className="text-white/90 text-base mt-1">
+                <DialogDescription>
                   Completa el formulario para crear una nueva categoría
                 </DialogDescription>
               </DialogHeader>
@@ -378,19 +379,18 @@ const CategoriesPage = () => {
                 </Form>
               </div>
 
-              <DialogFooter className="px-6 pb-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   Cancelar
                 </Button>
                 <Button
                   onClick={form.handleSubmit(onSubmit)}
-                  className="bg-gradient-to-r from-blue-600 to-ember-600 hover:from-blue-700 hover:to-ember-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={createMutation.isPending}
+                  className="dark:shadow-fire"
                 >
                   {createMutation.isPending ? (
                     <>
@@ -406,28 +406,28 @@ const CategoriesPage = () => {
           </Dialog>
         </motion.div>{" "}
         <motion.div
-          className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border/20"
+          className="bg-card border border-border rounded-2xl shadow-sm dark:shadow-ember"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <div className="p-6">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Lista de Categorías</h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                <h2 className="text-xl font-heading font-bold text-foreground">Lista de Categorías</h2>
+                <p className="text-muted-foreground text-sm mt-2">
                   Administra las categorías para organizar tus productos
                 </p>
               </div>
-              <div className="flex flex-col md:flex-row md:items-center gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium px-3 py-2 bg-muted/30 rounded-lg border border-border">
                   <Tags className="h-4 w-4" />
                   <span>{filteredCategories?.length || 0} categorías</span>
                 </div>
                 <select
                   value={sortType}
                   onChange={(e) => setSortType(e.target.value)}
-                  className="rounded-lg border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                  className="rounded-xl border border-border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium"
                 >
                   <option value="id_desc">Más recientes</option>
                   <option value="id_asc">Más antiguas</option>
@@ -436,43 +436,41 @@ const CategoriesPage = () => {
                 </select>
               </div>
             </div>
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+            <div className="relative mb-8">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Buscar categorías por nombre o descripción..."
-                className="pl-10 w-full h-11 rounded-xl border border-gray-200/80 dark:border-gray-600/80 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-all duration-200 shadow-sm focus:shadow-md"
+                className="pl-12"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>{" "}
             {isLoading ? (
-              <div className="flex justify-center py-16">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-ember-100 dark:from-blue-900/30 dark:to-ember-900/30 flex items-center justify-center mx-auto shadow-lg">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+              <div className="flex justify-center py-20">
+                <div className="text-center space-y-6">
+                  <div className="relative">
+                    <div className="w-20 h-20 border-4 border-primary/20 rounded-full animate-spin mx-auto"></div>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
                   </div>
-                  <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Cargando categorías...</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Obteniendo la información de las categorías
-                  </p>
+                  <p className="text-lg font-medium text-muted-foreground">Cargando categorías...</p>
                 </div>
               </div>
             ) : filteredCategories && filteredCategories.length > 0 ? (
-              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden shadow-lg">
+              <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-gray-800 dark:to-blue-900/20 border-gray-200/80 dark:border-gray-700/80">
-                      <TableHead className="w-16 text-center font-semibold text-gray-900 dark:text-gray-100">
+                    <TableRow className="border-border bg-muted/80">
+                      <TableHead className="w-16 text-center font-semibold">
                         Imagen
                       </TableHead>
-                      <TableHead className="text-center font-semibold text-gray-900 dark:text-gray-100">
+                      <TableHead className="text-center font-semibold">
                         Nombre
                       </TableHead>
-                      <TableHead className="text-center font-semibold text-gray-900 dark:text-gray-100 hidden md:table-cell">
+                      <TableHead className="text-center font-semibold hidden md:table-cell">
                         Descripción
                       </TableHead>
-                      <TableHead className="text-center font-semibold text-gray-900 dark:text-gray-100">
+                      <TableHead className="text-center font-semibold">
                         Acciones
                       </TableHead>
                     </TableRow>
@@ -484,7 +482,7 @@ const CategoriesPage = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.05 * index }}
-                        className="group hover:bg-gradient-to-r hover:from-gray-50/80 hover:to-blue-50/30 dark:hover:from-gray-800/50 dark:hover:to-blue-900/20 transition-all duration-200 border-gray-200/50 dark:border-gray-700/50"
+                        className="group hover:bg-muted/30 transition-all duration-200 border-border"
                       >
                         <TableCell className="w-16 text-center">
                           {category.imagen_url ? (
@@ -553,16 +551,16 @@ const CategoriesPage = () => {
               </div>
             ) : (
               <motion.div
-                className="flex flex-col items-center justify-center py-16 text-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-200/80 dark:border-gray-700/80"
+                className="flex flex-col items-center justify-center py-24 text-center"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-ember-100 dark:from-blue-900/30 dark:to-ember-900/30 flex items-center justify-center mb-6 shadow-lg">
-                  <Tags className="h-10 w-10 text-blue-500 dark:text-blue-400" />
+                <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mb-8 shadow-md dark:shadow-ember">
+                  <Tags className="h-20 w-20 text-primary" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No hay categorías</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">
+                <h3 className="text-2xl font-heading font-bold text-foreground mb-4">No hay categorías</h3>
+                <p className="text-muted-foreground text-base mb-8 max-w-md leading-relaxed">
                   {searchTerm
                     ? "No se encontraron categorías con ese término de búsqueda"
                     : "Comienza creando tu primera categoría para organizar tus productos"}
@@ -574,10 +572,11 @@ const CategoriesPage = () => {
                         <div>
                           <Button
                             onClick={() => setIsDialogOpen(true)}
-                            className="bg-gradient-to-r from-blue-600 to-ember-600 hover:from-blue-700 hover:to-ember-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                            className="font-semibold dark:shadow-fire"
+                            size="lg"
                             disabled={user?.id_role === 2 && !isWithinBusinessHours}
                           >
-                            <Plus className="mr-2 h-4 w-4" />
+                            <Plus className="mr-2 h-5 w-5" />
                             Nueva Categoría
                           </Button>
                         </div>
@@ -594,7 +593,6 @@ const CategoriesPage = () => {
                   <Button
                     variant="outline"
                     onClick={() => setSearchTerm("")}
-                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
                   >
                     Limpiar búsqueda
                   </Button>
@@ -603,22 +601,24 @@ const CategoriesPage = () => {
             )}{" "}
             {/* Paginación mejorada */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Mostrando {indexOfFirstItem + 1} a {Math.min(indexOfLastItem, filteredCategories?.length || 0)} de{" "}
-                  {filteredCategories?.length || 0} categorías
+              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+                <div className="text-sm text-muted-foreground font-medium">
+                  Mostrando <span className="font-bold text-primary">{indexOfFirstItem + 1}</span> a{" "}
+                  <span className="font-bold text-primary">{Math.min(indexOfLastItem, filteredCategories?.length || 0)}</span> de{" "}
+                  <span className="font-bold text-primary">{filteredCategories?.length || 0}</span> categorías
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => paginate(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="h-10"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
                   </Button>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-1 bg-gray-100/80 dark:bg-gray-700/80 rounded-lg backdrop-blur-sm">
+                  <span className="text-sm font-semibold text-foreground px-3 py-2 bg-muted/50 rounded-lg border border-border">
                     Página {currentPage} de {totalPages}
                   </span>
                   <Button
@@ -626,9 +626,10 @@ const CategoriesPage = () => {
                     size="sm"
                     onClick={() => paginate(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="h-10"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    Siguiente
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
               </div>
@@ -638,28 +639,25 @@ const CategoriesPage = () => {
       </motion.div>{" "}
       {/* Modal de confirmación de eliminación */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-card/95 backdrop-blur-sm border border-border/50 shadow-2xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full">
-              <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-destructive/10 rounded-full">
+              <AlertTriangle className="h-10 w-10 text-destructive" />
             </div>
-            <AlertDialogTitle className="text-xl font-semibold text-center text-gray-900 dark:text-gray-100">
+            <AlertDialogTitle className="text-xl font-heading font-bold text-center">
               Eliminar categoría
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-gray-600 dark:text-gray-400">
+            <AlertDialogDescription className="text-center">
               ¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-center space-x-3 mt-6">
-            <AlertDialogCancel
-              onClick={() => setShowDeleteDialog(false)}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
-            >
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-destructive hover:bg-destructive/90"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar

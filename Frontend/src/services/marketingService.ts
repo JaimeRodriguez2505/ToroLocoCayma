@@ -5,6 +5,8 @@ export interface Banner {
   id_banner?: number;
   imagen_url: string | null;
   whatsapp: string | null;
+  titulo?: string | null;
+  descripcion?: string | null;
   creado_en?: string;
   actualizado_en?: string;
 }
@@ -12,6 +14,8 @@ export interface Banner {
 export interface BannerFormData {
   imagen?: File;
   whatsapp?: string;
+  titulo?: string;
+  descripcion?: string;
 }
 
 // Interfaces para Tarjetas - Ajustado según el backend
@@ -59,6 +63,12 @@ export const updateBanner = async (data: BannerFormData): Promise<Banner> => {
     formData.append('imagen_banner', data.imagen);
     if (data.whatsapp !== undefined) {
       formData.append('whatsapp', data.whatsapp);
+    }
+    if (data.titulo !== undefined) {
+      formData.append('titulo', data.titulo);
+    }
+    if (data.descripcion !== undefined) {
+      formData.append('descripcion', data.descripcion);
     }
     
     const { data: responseData } = await api.put(`/marketing/banner`, formData, {
@@ -270,6 +280,12 @@ export const createBannerCarrusel = async (data: BannerFormData): Promise<Banner
     if (data.whatsapp !== undefined) {
       formData.append('whatsapp', data.whatsapp);
     }
+    if (data.titulo !== undefined) {
+      formData.append('titulo', data.titulo);
+    }
+    if (data.descripcion !== undefined) {
+      formData.append('descripcion', data.descripcion);
+    }
     const { data: responseData } = await api.post(`/marketing/banners`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -284,13 +300,18 @@ export const createBannerCarrusel = async (data: BannerFormData): Promise<Banner
 
 export const updateBannerCarrusel = async (id: number, data: BannerFormData): Promise<Banner> => {
   try {
-    if (!data.imagen) {
-      throw new Error("Se requiere una imagen para actualizar el banner");
-    }
     const formData = new FormData();
-    formData.append('imagen_banner', data.imagen);
+    if (data.imagen) {
+      formData.append('imagen_banner', data.imagen);
+    }
     if (data.whatsapp !== undefined) {
       formData.append('whatsapp', data.whatsapp);
+    }
+    if (data.titulo !== undefined) {
+      formData.append('titulo', data.titulo);
+    }
+    if (data.descripcion !== undefined) {
+      formData.append('descripcion', data.descripcion);
     }
     const { data: responseData } = await api.put(`/marketing/banners/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

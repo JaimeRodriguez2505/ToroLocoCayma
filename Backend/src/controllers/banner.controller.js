@@ -26,6 +26,7 @@ const bannerController = {
       });
       return res.status(200).json(bannersConImagen);
     } catch (error) {
+      console.error('Error al obtener banners:', error);
       return res.status(500).json({ message: 'Error al obtener banners', error: error.message });
     }
   },
@@ -40,6 +41,7 @@ const bannerController = {
       if (data.imagen_url) data.imagen_url = generarUrlCompleta(data.imagen_url, req);
       return res.status(200).json(data);
     } catch (error) {
+      console.error('Error al obtener banner por ID:', error);
       return res.status(500).json({ message: 'Error al obtener banner', error: error.message });
     }
   },
@@ -49,12 +51,18 @@ const bannerController = {
     try {
       if (!req.file) return res.status(400).json({ message: 'Debe subir una imagen para el banner' });
       const imagen_url = req.file.path.replace(/.*\/uploads/, '/uploads');
-      const { whatsapp } = req.body;
-      const banner = await Banner.create({ imagen_url, whatsapp: whatsapp || null });
+      const { whatsapp, titulo, descripcion } = req.body;
+      const banner = await Banner.create({ 
+        imagen_url, 
+        whatsapp: whatsapp || null,
+        titulo: titulo || null,
+        descripcion: descripcion || null
+      });
       const data = banner.toJSON();
       if (data.imagen_url) data.imagen_url = generarUrlCompleta(data.imagen_url, req);
       return res.status(201).json({ message: 'Banner creado exitosamente', banner: data });
     } catch (error) {
+      console.error('Error al crear banner:', error);
       return res.status(500).json({ message: 'Error al crear banner', error: error.message });
     }
   },
@@ -75,6 +83,9 @@ const bannerController = {
         banner.imagen_url = req.file.path.replace(/.*\/uploads/, '/uploads');
       }
       if (req.body.whatsapp !== undefined) banner.whatsapp = req.body.whatsapp;
+      if (req.body.titulo !== undefined) banner.titulo = req.body.titulo;
+      if (req.body.descripcion !== undefined) banner.descripcion = req.body.descripcion;
+      
       await banner.save();
       const data = banner.toJSON();
       if (data.imagen_url) data.imagen_url = generarUrlCompleta(data.imagen_url, req);

@@ -66,24 +66,11 @@ function updateDOMTheme(theme: Theme) {
     htmlElement.classList.add("dark")
     htmlElement.classList.remove("light")
     htmlElement.style.colorScheme = "dark"
-    document.body.classList.add("dark")
-    document.body.classList.remove("light")
   } else {
     htmlElement.classList.remove("dark")
     htmlElement.classList.add("light")
     htmlElement.style.colorScheme = "light"
-    document.body.classList.add("light")
-    document.body.classList.remove("dark")
   }
-
-  // Forzar la actualización de los estilos
-  setTimeout(() => {
-    document.body.style.transition = "none"
-    document.body.style.backgroundColor = theme === "dark" ? "#020817" : "#ffffff"
-    setTimeout(() => {
-      document.body.style.transition = ""
-    }, 10)
-  }, 0)
 }
 
 // Función para obtener el tema preferido del sistema

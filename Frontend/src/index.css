@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,170 +7,105 @@
 @layer base {
   :root {
     /* ============================================
-       FIRE ORANGE - Primary Brand (MODERNIZADO)
+       TORO LOCO THEME - LIGHT MODE (Modern 2026)
        ============================================ */
+    --background: 0 0% 98%; /* Off-white suave */
+    --foreground: 0 0% 10%; /* Casi negro */
 
-    --primary: 20 100% 52%; /* #ff7a00 - Más brillante que actual */
+    --card: 0 0% 100%; /* Blanco puro */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Primary: Rojo Intenso (del logo) */
+    --primary: 0 85% 55%; /* #EF4444 - Vibrant Red */
     --primary-foreground: 0 0% 100%;
 
-    /* Fire completo (light mode) */
-    --brand-fire-50: 28 100% 97%;    /* #fff9f0 */
-    --brand-fire-100: 28 100% 94%;   /* #fff0db */
-    --brand-fire-200: 27 100% 87%;   /* #ffd9a8 */
-    --brand-fire-300: 26 100% 76%;   /* #ffbb70 */
-    --brand-fire-400: 24 100% 64%;   /* #ff9933 */
-    --brand-fire-500: 20 100% 52%;   /* #ff7a00 - PRIMARY (más vibrante) */
-    --brand-fire-600: 18 100% 47%;   /* #f06500 */
-    --brand-fire-700: 16 98% 40%;    /* #cc5200 */
-    --brand-fire-800: 14 95% 33%;    /* #a84200 */
-    --brand-fire-900: 12 88% 27%;    /* #7d3008 */
-    --brand-fire-950: 10 90% 18%;    /* #4d1a02 */
+    /* Secondary: Neutral Grey */
+    --secondary: 0 0% 96%; /* Gris muy claro */
+    --secondary-foreground: 0 0% 10%;
 
-    /* ============================================
-       EMBER RED - Secondary Brand (MODERNIZADO)
-       ============================================ */
+    --muted: 0 0% 96%; /* Gris muy claro */
+    --muted-foreground: 0 0% 35%; /* Gris oscuro - WCAG AA compliant */
 
-    --secondary: 0 88% 63%; /* #f44336 - Más brillante */
-    --secondary-foreground: 0 0% 100%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 10%;
 
-    /* Ember completo (light mode) */
-    --brand-ember-50: 0 86% 97%;     /* #fef2f2 */
-    --brand-ember-100: 0 93% 94%;    /* #fee2e2 */
-    --brand-ember-200: 0 96% 89%;    /* #fecaca */
-    --brand-ember-300: 0 94% 82%;    /* #fca5a5 */
-    --brand-ember-400: 0 91% 71%;    /* #f87171 */
-    --brand-ember-500: 0 88% 63%;    /* #f44336 - SECONDARY (más vibrante) */
-    --brand-ember-600: 4 90% 58%;    /* #e53935 */
-    --brand-ember-700: 4 85% 52%;    /* #d32f2f */
-    --brand-ember-800: 4 79% 45%;    /* #c62828 */
-    --brand-ember-900: 4 70% 38%;    /* #b71c1c */
-    --brand-ember-950: 4 75% 20%;    /* #7f0000 */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    /* ============================================
-       NEUTRALS - Charcoal Theme
-       ============================================ */
+    --border: 0 0% 88%; /* Gris claro */
+    --input: 0 0% 100%; /* Blanco con border visible */
+    --ring: 0 85% 55%;
 
-    --neutral-50: 0 0% 98%;          /* #fafafa */
-    --neutral-100: 0 0% 96%;         /* #f5f5f5 */
-    --neutral-200: 0 0% 90%;         /* #e5e5e5 */
-    --neutral-300: 0 0% 83%;         /* #d4d4d4 */
-    --neutral-400: 0 0% 64%;         /* #a3a3a3 */
-    --neutral-500: 0 0% 45%;         /* #737373 */
-    --neutral-600: 0 0% 38%;         /* #525252 */
-    --neutral-700: 0 0% 26%;         /* #404040 */
-    --neutral-800: 0 0% 15%;         /* #262626 */
-    --neutral-900: 0 0% 9%;          /* #171717 */
-    --neutral-950: 0 0% 4%;          /* #0a0a0a */
+    --radius: 0.75rem;
 
-    /* ============================================
-       SEMANTIC COLORS
-       ============================================ */
-
-    --success: 142 71% 45%;          /* #22c55e */
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 50%;           /* #f59e0b */
-    --warning-foreground: 222 47% 11%;
-
-    --destructive: 0 88% 63%;        /* usar ember */
-    --destructive-foreground: 0 0% 100%;
-
-    --info: 217 91% 60%;             /* #3b82f6 */
-    --info-foreground: 0 0% 100%;
-
-    /* ============================================
-       SPACING SCALE (4px base)
-       ============================================ */
-
-    --space-0: 0;
-    --space-1: 0.25rem;    /* 4px */
-    --space-2: 0.5rem;     /* 8px */
-    --space-3: 0.75rem;    /* 12px */
-    --space-4: 1rem;       /* 16px */
-    --space-5: 1.25rem;    /* 20px */
-    --space-6: 1.5rem;     /* 24px */
-    --space-8: 2rem;       /* 32px */
-    --space-10: 2.5rem;    /* 40px */
-    --space-12: 3rem;      /* 48px */
-    --space-16: 4rem;      /* 64px */
-
-    /* Touch Targets (Mobile) */
-    --touch-target-min: 44px;
-    --touch-target-comfortable: 48px;
-
-    /* ============================================
-       BORDER RADIUS
-       ============================================ */
-
-    --radius: 0.5rem;         /* 8px - base */
-    --radius-sm: 0.375rem;    /* 6px */
-    --radius-md: 0.625rem;    /* 10px */
-    --radius-lg: 0.75rem;     /* 12px */
-    --radius-xl: 1rem;        /* 16px */
-    --radius-full: 9999px;
-
-    /* ============================================
-       SHADOWS
-       ============================================ */
+    /* Chart/Data Visualization Colors */
+    --chart-1: 0 85% 55%; /* Rojo principal */
+    --chart-2: 0 0% 40%; /* Gris oscuro */
+    --chart-3: 0 0% 60%; /* Gris medio */
+    --chart-4: 0 0% 80%; /* Gris claro */
+    --chart-5: 0 0% 20%; /* Gris muy oscuro */
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-base: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-    /* Fire/Ember Glow Effects */
-    --shadow-fire: 0 0 20px rgba(255, 122, 0, 0.3), 0 4px 12px rgba(255, 122, 0, 0.15);
-    --shadow-fire-lg: 0 0 30px rgba(255, 122, 0, 0.4), 0 8px 16px rgba(255, 122, 0, 0.2);
-    --shadow-ember: 0 0 20px rgba(244, 67, 54, 0.3), 0 4px 12px rgba(244, 67, 54, 0.15);
-
-    /* ============================================
-       SHADCN COMPATIBILITY
-       ============================================ */
-
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --muted: 30 20% 95%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 20 100% 52%; /* Fire orange modernizado */
-    --accent-foreground: 0 0% 100%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 20 100% 52%; /* Fire orange modernizado */
+    /* Soft shadows for light mode */
+    --shadow-fire: 0 10px 30px -10px rgba(239, 68, 68, 0.4);
+    --shadow-fire-lg: 0 20px 40px -10px rgba(239, 68, 68, 0.5);
+    --shadow-ember: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+    --shadow-primary-glow: 0 0 25px rgba(239, 68, 68, 0.3);
   }
 
   .dark {
-    /* Dark Mode Overrides */
-    --background: 25 25% 8%;         /* #121212 */
-    --foreground: 30 20% 95%;        /* #f5f5f5 */
-    --card: 25 25% 10%;              /* #1a1a1a */
-    --card-foreground: 30 20% 95%;
-    --border: 25 25% 20%;            /* #333333 */
+    /* ============================================
+       TORO LOCO THEME - DARK MODE (2026 Intense Glows)
+       ============================================ */
+    /* Background: Negro suave (no puro) */
+    --background: 0 0% 8%; /* #141414 */
+    --foreground: 0 0% 95%; /* Blanco suave */
 
-    /* Fire/Ember más brillantes en dark mode */
-    --primary: 22 100% 58%;          /* Más brillante para contraste */
-    --secondary: 0 90% 68%;
+    /* Cards: Gris muy oscuro */
+    --card: 0 0% 12%; /* #1F1F1F */
+    --card-foreground: 0 0% 95%;
 
-    --popover: 25 25% 10%;
-    --popover-foreground: 30 20% 95%;
-    --muted: 25 25% 15%;
-    --muted-foreground: 0 0% 70%;
-    --accent: 22 100% 58%;
-    --accent-foreground: 25 25% 8%;
-    --destructive: 0 88% 63%;
-    --destructive-foreground: 0 0% 100%;
-    --input: 25 25% 20%;
-    --ring: 22 100% 58%;
-    --success: 142.1 70.6% 45.3%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38.3 92.1% 50.0%;
-    --warning-foreground: 0 0% 3%;
-    --info: 217 91% 60%;
-    --info-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Primary: Rojo Intenso (brilla en oscuridad) */
+    --primary: 0 85% 60%; /* #DC2626 - más brillante en dark */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 16%; /* Gris oscuro */
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 16%; /* Gris oscuro */
+    --muted-foreground: 0 0% 70%; /* Gris claro - WCAG AA compliant */
+
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 95%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%; /* Gris medio oscuro */
+    --input: 0 0% 15%; /* Gris oscuro con contraste visible */
+    --ring: 0 85% 60%;
+
+    --chart-1: 0 85% 60%; /* Rojo principal */
+    --chart-2: 0 0% 40%; /* Gris oscuro */
+    --chart-3: 0 0% 60%; /* Gris medio */
+    --chart-4: 0 0% 80%; /* Gris claro */
+    --chart-5: 0 0% 20%; /* Gris muy oscuro */
+
+    /* Glowing Red Shadows - INTENSOS para modo oscuro */
+    --shadow-fire: 0 0 30px -5px rgba(220, 38, 38, 0.8);
+    --shadow-fire-lg: 0 0 50px -5px rgba(220, 38, 38, 1);
+    --shadow-ember: 0 10px 40px -15px rgba(220, 38, 38, 0.3);
+    --shadow-primary-glow: 0 0 25px rgba(220, 38, 38, 0.4);
   }
 }
 
@@ -176,76 +113,104 @@
   * {
     @apply border-border;
   }
-  
+
+  /* Tipografía 2026 - Inter para texto, Poppins para títulos */
   body {
-    @apply bg-background text-foreground;
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(242, 117, 10, 0.03) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.03) 0%, transparent 50%);
-  }
-  
-  /* Efectos de fuego y brasas */
-  .fire-glow {
-    box-shadow: 
-      0 0 20px rgba(242, 117, 10, 0.3),
-      0 0 40px rgba(242, 117, 10, 0.2),
-      0 0 60px rgba(242, 117, 10, 0.1);
-  }
-  
-  .ember-glow {
-    box-shadow: 
-      0 0 15px rgba(220, 38, 38, 0.4),
-      0 0 30px rgba(220, 38, 38, 0.2);
-  }
-  
-  .charcoal-texture {
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(0, 0, 0, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.05) 0%, transparent 50%);
-  }
-  
-  /* Optimización global de espaciado */
-  .page-container {
-    @apply p-1 sm:p-2 lg:p-3;
-  }
-  
-  .content-container {
-    @apply space-y-3 sm:space-y-4;
-  }
-  
-  .card-container {
-    @apply p-3 sm:p-4 rounded-xl charcoal-texture;
-  }
-  
-  .table-cell-optimized {
-    @apply p-2;
-  }
-  
-  .header-optimized {
-    @apply h-12 sm:h-14 px-2 sm:px-3 lg:px-4;
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
   }
 
-  /* Espaciado mejorado entre botones */
-  .button-group {
-    @apply flex flex-wrap gap-2;
+  h1, h2, h3 {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 700;
   }
 
-  .button-group-sm {
-    @apply flex flex-wrap gap-1.5;
+  h4, h5, h6 {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
   }
 
-  .button-group-lg {
-    @apply flex flex-wrap gap-3;
+  /* Escala tipográfica 2026 */
+  h1 {
+    @apply text-4xl; /* 2.5rem / 40px */
+    font-weight: 800;
   }
 
-  /* Espaciado entre botones inline */
-  button + button,
-  a[role="button"] + button,
-  button + a[role="button"],
-  a[role="button"] + a[role="button"] {
-    @apply ml-1.5 sm:ml-2;
+  h2 {
+    @apply text-3xl; /* 2rem / 32px */
+    font-weight: 700;
   }
 
-  /* Botones con tema parrillería - ELIMINADOS (ahora en componente Button) */
-  /* .btn-fire y .btn-ember ya no se usan - usar <Button variant="fire"> */
+  h3 {
+    @apply text-2xl; /* 1.5rem / 24px */
+    font-weight: 700;
+  }
+
+  h4 {
+    @apply text-xl; /* 1.25rem / 20px */
+    font-weight: 600;
+  }
+}
+
+/* =========================================
+   UTILITY CLASSES & ANIMATIONS - 2026
+   ========================================= */
+
+.text-gradient-primary {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-red-600;
+}
+
+.card-hover {
+  @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/30;
+}
+
+.card-hover-intense {
+  @apply transition-all duration-200 hover:shadow-fire-lg hover:-translate-y-1 hover:border-primary dark:hover:shadow-fire-lg;
+}
+
+/* Glass effect for modern look */
+.glass {
+  @apply bg-background/80 backdrop-blur-md border border-border/50;
+}
+
+/* Glow effects - INTENSOS en dark mode */
+.glow-text {
+  text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.dark .glow-text {
+  text-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
+}
+
+.glow-box {
+  box-shadow: var(--shadow-primary-glow);
+}
+
+.dark .glow-box {
+  box-shadow: var(--shadow-fire-lg);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors;
+}
+
+/* Touch target utility - Mobile friendly */
+.tap-target {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Safe area padding for iOS */
+.pb-safe {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
 }

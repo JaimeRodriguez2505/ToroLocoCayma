@@ -5,23 +5,23 @@ import { cn } from "../../lib/utils"
 import { Loader2 } from "lucide-react"
 
 const cardVariants = cva(
-  "rounded-xl transition-all duration-200",
+  "rounded-2xl transition-all duration-200",
   {
     variants: {
       variant: {
-        default: "bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md",
-        elevated: "bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 shadow-lg hover:shadow-xl",
-        outlined: "bg-transparent border-2 border-neutral-300 dark:border-neutral-600",
-        filled: "bg-neutral-50 dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600",
-        interactive: "bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 shadow-sm hover:shadow-md hover:border-fire-500 cursor-pointer",
-        fire: "bg-gradient-to-br from-fire-50 to-fire-100 dark:from-fire-950 dark:to-fire-900 border border-fire-200 dark:border-fire-800 shadow-fire",
-        ember: "bg-gradient-to-br from-ember-50 to-ember-100 dark:from-ember-950 dark:to-ember-900 border border-ember-200 dark:border-ember-800 shadow-ember",
+        default: "bg-card text-card-foreground border border-border shadow-sm dark:shadow-ember",
+        elevated: "bg-card text-card-foreground border border-border shadow-lg dark:shadow-fire hover:shadow-xl",
+        outlined: "bg-transparent border-2 border-border hover:border-primary/30",
+        filled: "bg-muted text-muted-foreground border border-border",
+        interactive: "bg-card text-card-foreground border border-border shadow-sm dark:shadow-ember hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 cursor-pointer",
+        fire: "bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-fire dark:shadow-fire-lg",
+        ember: "bg-gradient-to-br from-muted to-muted/80 border border-border shadow-ember",
       },
       size: {
-        sm: "p-3",
-        default: "p-4",
-        md: "p-5",
-        lg: "p-6",
+        sm: "p-4",
+        default: "p-6",
+        md: "p-8",
+        lg: "p-card-padding",
       },
     },
     defaultVariants: {
@@ -62,8 +62,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           {...props}
         >
           {loading && (
-            <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 flex items-center justify-center z-10 rounded-xl">
-              <Loader2 className="w-6 h-6 text-fire-600 animate-spin" />
+            <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
             </div>
           )}
           {children}
@@ -84,8 +84,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {...(props as any)}
       >
         {loading && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-neutral-800/80 flex items-center justify-center z-10 rounded-xl">
-            <Loader2 className="w-6 h-6 text-fire-600 animate-spin" />
+          <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+            <Loader2 className="w-6 h-6 text-primary animate-spin" />
           </div>
         )}
         {children}

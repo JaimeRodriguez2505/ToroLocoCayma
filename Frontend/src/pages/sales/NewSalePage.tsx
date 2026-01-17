@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Loader2, Search, Barcode, AlertTriangle, X, Receipt, CreditCard, Package, PauseCircle, ListOrdered, RefreshCw, FileBarChart, FileSpreadsheet, QrCode, Keyboard, Clock, CheckCircle2, FileCheck, Percent, Settings, Calculator, User, Eye, Printer, Trash, Smartphone, Truck, Zap, ChefHat } from 'lucide-react'
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart, Loader2, Search, Barcode, AlertTriangle, X, Receipt, CreditCard, Package, PauseCircle, ListOrdered, RefreshCw, FileBarChart, FileSpreadsheet, QrCode, Keyboard, Clock, CheckCircle2, FileCheck, Percent, Settings, Calculator, User, Eye, Printer, Trash, Smartphone, Truck, Zap, ChefHat, BookOpen } from 'lucide-react'
 
 // UI Components
 import { Button } from "../../components/ui/button"
+import { DigitalMenu } from "../../components/sales/DigitalMenu"
 import { Switch } from "../../components/ui/switch"
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
@@ -20,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 // Services
 import { fetchProducts } from "../../services/productService"
+import { fetchCategories } from "../../services/categoryService"
 import { createSale, generateSaleTicket } from "../../services/saleService"
 import { fetchCompanyForSales } from "../../services/companyService"
 import { buscarProductoPorCodigoBarras, obtenerCodigosBarras } from "../../services/codigoBarrasService"
@@ -182,6 +184,7 @@ const NewSalePage = () => {
 
   // Estados para códigos de barras
   const [isBarcodeDialogOpen, setIsBarcodeDialogOpen] = useState(false)
+  const [isDigitalMenuMode, setIsDigitalMenuMode] = useState(true) // Default to Digital Menu for better UX
   
   // Estados para la versión móvil (comentados hasta implementación completa)
   // const [isMobileProductSearchOpen, setIsMobileProductSearchOpen] = useState(false)
@@ -286,6 +289,11 @@ const NewSalePage = () => {
   const { data: products, isLoading: isLoadingProducts } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
+  })
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
   })
 
   const { data: company } = useQuery({
@@ -2433,66 +2441,6 @@ const NewSalePage = () => {
     }
   }
 
-  // Función para completar venta en versión móvil
-  const handleMobileCompleteSale = () => {
-    if (cart.length === 0) {
-      toast.error("Agrega productos al carrito")
-      return
-    }
-
-    // Validación de RUC obligatorio para Factura en móvil
-    if (tipoDocumento === "01") {
-      if (!clienteData || !clienteData.numeroDocumento || clienteData.numeroDocumento.length !== 11) {
-        toast.error("Para Factura, ingrese un RUC válido (11 dígitos)")
-        setIsClienteDialogOpen(true)
-        return
-      }
-    }
-
-    // Validación de efectivo suficiente
-    const totalAPagar = saleDiscount.isDiscount ? totalWithDiscount : total
-    if (metodoPago === "efectivo") {
-      const recibido = parseFloat(montoRecibido || "0")
-      if (isNaN(recibido) || recibido < totalAPagar) {
-        toast.error("El monto recibido en efectivo es insuficiente")
-        return
-      }
-    }
-    
-    // Preparar datos de venta igual que en desktop usando la estructura correcta
-    const saleData: SaleFormData = {
-      id_cajero: user?.id || 1,
-      metodo_pago: metodoPago,
-      observaciones: observaciones || null,
-      items: cart.map(item => ({
-        codigo_barras: item.codigos_barras?.[0] || `PROD_${item.producto_id}`,
-        cantidad: item.cantidad,
-        es_mayorista: item.esPrecioMayorista || false,
-        precio_personalizado: item.precioVariable || undefined,
-        precio_personalizado_con_igv: item.precioVariableConIgv || undefined
-      })),
-      es_descuento: saleDiscount.isDiscount,
-      descuento: saleDiscount.amount
-    }
-
-    // Comprobante según tipoDocumento (Factura/Boleta)
-    if (tipoDocumento && (tipoDocumento === "01" || tipoDocumento === "03")) {
-      saleData.comprobante = prepareComprobanteData()
-    }
-
-    // Campos de pagos electrónicos
-    if (metodoPago === "yape") {
-      saleData.yape_celular = yapeCelular
-      saleData.yape_codigo = yapeCodigo
-    }
-    if (metodoPago === "plin") {
-      saleData.plin_celular = plinCelular
-      saleData.plin_codigo = plinCodigo
-    }
-    
-    createSaleMutation.mutate(saleData)
-  }
-
   // Función para abrir el scanner de códigos de barras en móvil
   const handleMobileOpenBarcodeScanner = () => {
     setIsBarcodeDialogOpen(true)
@@ -3848,7 +3796,6 @@ const NewSalePage = () => {
           setObservaciones={setObservaciones}
           autoPrintComanda={generarComandaEImprimir}
           setAutoPrintComanda={setGenerarComandaEImprimir}
-          onCompleteSale={handleMobileCompleteSale}
           onOpenBarcodeScanner={handleMobileOpenBarcodeScanner}
           onBack={() => window.history.back()}
           total={total}
@@ -4333,6 +4280,17 @@ const NewSalePage = () => {
                     </Button>
 
                     <Button
+                      variant={isDigitalMenuMode ? "default" : "outline"}
+                      onClick={() => setIsDigitalMenuMode(!isDigitalMenuMode)}
+                      size="sm"
+                      className={isDigitalMenuMode ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      <BookOpen className="h-3.5 w-3.5 mr-1.5 sm:mr-2" />
+                      <span className="hidden sm:inline">Carta Digital</span>
+                      <span className="sm:hidden">Carta</span>
+                    </Button>
+
+                    <Button
                       variant="fire"
                       onClick={openBarcodeScanner}
                       size="sm"
@@ -4356,201 +4314,214 @@ const NewSalePage = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-3 sm:p-4 lg:p-4">
-                {/* Buscador de productos */}
-                <div className="mb-3 sm:mb-4">
-                  <div className="relative" ref={productSearchRef}>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                      </div>
-                      <Input
-                        ref={productSearchInputRef}
-                        type="text"
-                        placeholder="Buscar productos..."
-                        value={productSearchTerm}
-                        onChange={(e) => {
-                          setProductSearchTerm(e.target.value)
-                          searchProducts(e.target.value)
-                        }}
-                        onFocus={() => {
-                          if (productSearchTerm.trim()) {
-                            setIsProductSearchOpen(true)
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && productSearchTerm.trim()) {
-                            e.preventDefault()
-                            // Si hay resultados, agregar el primero
-                            if (productSearchResults.length > 0) {
-                              addProductFromSearch(productSearchResults[0])
-                            } else {
-                              handleSearchOrBarcode(productSearchTerm.trim())
-                            }
-                          } else if (e.key === 'ArrowDown' && productSearchResults.length > 0) {
-                            e.preventDefault()
-                            // Enfocar el primer resultado
-                            const firstResult = document.querySelector('[data-product-result="0"]') as HTMLElement
-                            if (firstResult) {
-                              firstResult.focus()
-                            }
-                          } else if (e.key === 'Tab' && productSearchResults.length > 0) {
-                            e.preventDefault()
-                            // Tab también va al primer resultado
-                            const firstResult = document.querySelector('[data-product-result="0"]') as HTMLElement
-                            if (firstResult) {
-                              firstResult.focus()
-                            }
-                          }
-                        }}
-                        className="pl-10 bg-white/90 dark:bg-neutral-800/90"
-                        inputSize="md"
-                      />
-                      {isLoadingProductSearch && (
-                        <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
-                          <Loader2 className="h-4 w-4 text-fire-500 animate-spin" />
-                        </div>
-                      )}
-                    </div>                    {/* Dropdown de resultados modernizado y compacto */}
-                    <AnimatePresence>
-                      {isProductSearchOpen && productSearchResults.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="dropdown-results"
-                        >
-                          <div className="dropdown-results-wrapper">
-                            <div className="dropdown-results-list">
-                              {productSearchResults.map((product, index) => (
-                                <motion.div
-                                  key={product.id_producto}
-                                  whileHover={{ scale: 1.01, x: 2 }}
-                                  whileTap={{ scale: 0.99 }}
-                                  className="dropdown-item hover:bg-gradient-to-r hover:from-ember-50 hover:to-fire-50 dark:hover:from-slate-700 dark:hover:to-slate-600 group"
-                                  tabIndex={0}
-                                  data-product-result={index}
-                                  onClick={() => addProductFromSearch(product)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault()
-                                      addProductFromSearch(product)
-                                    } else if (e.key === 'ArrowDown') {
-                                      e.preventDefault()
-                                      const nextResult = document.querySelector(`[data-product-result="${index + 1}"]`) as HTMLElement
-                                      if (nextResult) {
-                                        nextResult.focus()
-                                      }
-                                    } else if (e.key === 'ArrowUp') {
-                                      e.preventDefault()
-                                      if (index === 0) {
-                                        // Volver al input de búsqueda
-                                        productSearchInputRef.current?.focus()
-                                      } else {
-                                        const prevResult = document.querySelector(`[data-product-result="${index - 1}"]`) as HTMLElement
-                                        if (prevResult) {
-                                          prevResult.focus()
-                                        }
-                                      }
-                                    } else if (e.key === 'Tab') {
-                                      e.preventDefault()
-                                      const nextResult = document.querySelector(`[data-product-result="${index + 1}"]`) as HTMLElement
-                                      if (nextResult) {
-                                        nextResult.focus()
-                                      } else {
-                                        // Si es el último resultado, volver al input de búsqueda
-                                        productSearchInputRef.current?.focus()
-                                      }
-                                    }
-                                  }}
-                                >
-                                  {/* Imagen del producto */}
-                                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden shadow-md border border-ember-200/50 dark:border-ember-700/30 bg-gradient-to-br from-ember-100 to-fire-100 dark:from-ember-900/30 dark:to-fire-900/30">
-                                    {getProductImageUrl(product) ? (
-                                      <img
-                                        src={getProductImageUrl(product)! || "/placeholder.svg"}
-                                        alt={product.nombre}
-                                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
-                                        loading="lazy"
-                                        onError={(e) => {
-                                          // Si la imagen falla al cargar, mostrar el ícono por defecto
-                                          const target = e.target as HTMLImageElement
-                                          target.style.display = 'none'
-                                          const parent = target.parentElement
-                                          if (parent && !parent.querySelector('.fallback-icon')) {
-                                            const fallbackDiv = document.createElement('div')
-                                            fallbackDiv.className = 'fallback-icon w-full h-full flex items-center justify-center'
-                                            fallbackDiv.innerHTML = '<svg class="h-6 w-6 text-fire-600 dark:text-fire-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>'
-                                            parent.appendChild(fallbackDiv)
-                                          }
-                                        }}
-                                        onLoad={(e) => {
-                                          // Asegurar que la imagen se muestre correctamente cuando carga
-                                          const target = e.target as HTMLImageElement
-                                          target.style.display = 'block'
-                                        }}
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center">
-                                        <Package className="h-6 w-6 text-fire-600 dark:text-fire-400" />
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Información principal del producto */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between">
-                                      <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 leading-tight truncate">
-                                          {product.nombre}
-                                        </h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                                            {product.sku || 'Sin código'}
-                                          </span>
-                                          <Badge
-                                            variant={product.stock > 10 ? "default" : product.stock > 0 ? "secondary" : "destructive"}
-                                            className="text-[10px] px-1.5 py-0.5 h-auto"
-                                          >
-                                            {product.stock} stock
-                                          </Badge>
-                                        </div>
-                                      </div>
-
-                                      {/* Solo precio, sin botón */}
-                                      <div className="flex flex-col items-end gap-1 ml-2">
-                                        <div className="text-sm font-bold text-fire-600 dark:text-fire-400">
-                                          {getDisplayPrice(product)}
-                                        </div>
-                                        <div className="flex gap-1">
-                                          {precioMayoristaMode && product.precio_mayoritario && product.precio_mayoritario !== "0.00" && (
-                                            <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/50">
-                                              Mayorista
-                                            </Badge>
-                                          )}
-                                          {product.es_oferta && (
-                                            <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-700/50">
-                                              Oferta
-                                            </Badge>
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-
-                            {/* Footer del dropdown */}
-                            <div className="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2">
-                              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                                {productSearchResults.length} producto{productSearchResults.length !== 1 ? 's' : ''} encontrado{productSearchResults.length !== 1 ? 's' : ''} • Presiona Enter para agregar
-                              </p>
-                            </div>
+              <CardContent className={`p-0 lg:p-0 h-[calc(100vh-280px)] lg:h-[calc(100vh-240px)] overflow-hidden ${isDigitalMenuMode ? '' : 'p-3 sm:p-4 lg:p-4'}`}>
+                {isDigitalMenuMode ? (
+                  <DigitalMenu 
+                    products={products || []}
+                    categories={categories || []}
+                    onAddToCart={(p) => {
+                      addToCart(p, { codigo: p.sku || 'SIN_CODIGO', cantidad: 1 }, precioMayoristaMode)
+                      toast.success(`${p.nombre} agregado`, { duration: 1500 })
+                    }} 
+                    className="h-full border-0 rounded-none bg-transparent shadow-none"
+                  />
+                ) : (
+                  <div className="p-3 sm:p-4 lg:p-4 h-full overflow-y-auto">
+                    {/* Buscador de productos */}
+                    <div className="mb-3 sm:mb-4">
+                      <div className="relative" ref={productSearchRef}>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          <Input
+                            ref={productSearchInputRef}
+                            type="text"
+                            placeholder="Buscar productos..."
+                            value={productSearchTerm}
+                            onChange={(e) => {
+                              setProductSearchTerm(e.target.value)
+                              searchProducts(e.target.value)
+                            }}
+                            onFocus={() => {
+                              if (productSearchTerm.trim()) {
+                                setIsProductSearchOpen(true)
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && productSearchTerm.trim()) {
+                                e.preventDefault()
+                                // Si hay resultados, agregar el primero
+                                if (productSearchResults.length > 0) {
+                                  addProductFromSearch(productSearchResults[0])
+                                } else {
+                                  handleSearchOrBarcode(productSearchTerm.trim())
+                                }
+                              } else if (e.key === 'ArrowDown' && productSearchResults.length > 0) {
+                                e.preventDefault()
+                                // Enfocar el primer resultado
+                                const firstResult = document.querySelector('[data-product-result="0"]') as HTMLElement
+                                if (firstResult) {
+                                  firstResult.focus()
+                                }
+                              } else if (e.key === 'Tab' && productSearchResults.length > 0) {
+                                e.preventDefault()
+                                // Tab también va al primer resultado
+                                const firstResult = document.querySelector('[data-product-result="0"]') as HTMLElement
+                                if (firstResult) {
+                                  firstResult.focus()
+                                }
+                              }
+                            }}
+                            className="pl-10 bg-white/90 dark:bg-neutral-800/90"
+                            inputSize="md"
+                          />
+                          {isLoadingProductSearch && (
+                            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
+                              <Loader2 className="h-4 w-4 text-fire-500 animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                        {/* Dropdown de resultados modernizado y compacto */}
+                        <AnimatePresence>
+                          {isProductSearchOpen && productSearchResults.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="dropdown-results"
+                            >
+                              <div className="dropdown-results-wrapper">
+                                <div className="dropdown-results-list">
+                                  {productSearchResults.map((product, index) => (
+                                    <motion.div
+                                      key={product.id_producto}
+                                      whileHover={{ scale: 1.01, x: 2 }}
+                                      whileTap={{ scale: 0.99 }}
+                                      className="dropdown-item hover:bg-gradient-to-r hover:from-ember-50 hover:to-fire-50 dark:hover:from-slate-700 dark:hover:to-slate-600 group"
+                                      tabIndex={0}
+                                      data-product-result={index}
+                                      onClick={() => addProductFromSearch(product)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                          e.preventDefault()
+                                          addProductFromSearch(product)
+                                        } else if (e.key === 'ArrowDown') {
+                                          e.preventDefault()
+                                          const nextResult = document.querySelector(`[data-product-result="${index + 1}"]`) as HTMLElement
+                                          if (nextResult) {
+                                            nextResult.focus()
+                                          }
+                                        } else if (e.key === 'ArrowUp') {
+                                          e.preventDefault()
+                                          if (index === 0) {
+                                            // Volver al input de búsqueda
+                                            productSearchInputRef.current?.focus()
+                                          } else {
+                                            const prevResult = document.querySelector(`[data-product-result="${index - 1}"]`) as HTMLElement
+                                            if (prevResult) {
+                                              prevResult.focus()
+                                            }
+                                          }
+                                        } else if (e.key === 'Tab') {
+                                          e.preventDefault()
+                                          const nextResult = document.querySelector(`[data-product-result="${index + 1}"]`) as HTMLElement
+                                          if (nextResult) {
+                                            nextResult.focus()
+                                          } else {
+                                            // Si es el último resultado, volver al input de búsqueda
+                                            productSearchInputRef.current?.focus()
+                                          }
+                                        }
+                                      }}
+                                    >
+                                      {/* Imagen del producto */}
+                                      <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden shadow-md border border-ember-200/50 dark:border-ember-700/30 bg-gradient-to-br from-ember-100 to-fire-100 dark:from-ember-900/30 dark:to-fire-900/30">
+                                        {getProductImageUrl(product) ? (
+                                          <img
+                                            src={getProductImageUrl(product)! || "/placeholder.svg"}
+                                            alt={product.nombre}
+                                            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                            loading="lazy"
+                                            onError={(e) => {
+                                              // Si la imagen falla al cargar, mostrar el ícono por defecto
+                                              const target = e.target as HTMLImageElement
+                                              target.style.display = 'none'
+                                              const parent = target.parentElement
+                                              if (parent && !parent.querySelector('.fallback-icon')) {
+                                                const fallbackDiv = document.createElement('div')
+                                                fallbackDiv.className = 'fallback-icon w-full h-full flex items-center justify-center'
+                                                fallbackDiv.innerHTML = '<svg class="h-6 w-6 text-fire-600 dark:text-fire-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>'
+                                                parent.appendChild(fallbackDiv)
+                                              }
+                                            }}
+                                            onLoad={(e) => {
+                                              // Asegurar que la imagen se muestre correctamente cuando carga
+                                              const target = e.target as HTMLImageElement
+                                              target.style.display = 'block'
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center">
+                                            <Package className="h-6 w-6 text-fire-600 dark:text-fire-400" />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Información principal del producto */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1 min-w-0">
+                                            <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 leading-tight truncate">
+                                              {product.nombre}
+                                            </h4>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                                {product.sku || 'Sin código'}
+                                              </span>
+                                              <Badge
+                                                variant={product.stock > 10 ? "default" : product.stock > 0 ? "secondary" : "destructive"}
+                                                className="text-[10px] px-1.5 py-0.5 h-auto"
+                                              >
+                                                {product.stock} stock
+                                              </Badge>
+                                            </div>
+                                          </div>
+
+                                          {/* Solo precio, sin botón */}
+                                          <div className="flex flex-col items-end gap-1 ml-2">
+                                            <div className="text-sm font-bold text-fire-600 dark:text-fire-400">
+                                              {getDisplayPrice(product)}
+                                            </div>
+                                            <div className="flex gap-1">
+                                              {precioMayoristaMode && product.precio_mayoritario && product.precio_mayoritario !== "0.00" && (
+                                                <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/50">
+                                                  Mayorista
+                                                </Badge>
+                                              )}
+                                              {product.es_oferta && (
+                                                <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-700/50">
+                                                  Oferta
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+
+                                {/* Footer del dropdown */}
+                                <div className="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                    {productSearchResults.length} producto{productSearchResults.length !== 1 ? 's' : ''} encontrado{productSearchResults.length !== 1 ? 's' : ''} • Presiona Enter para agregar
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                   </div>
                 </div>                {/* Contenido del carrito - Diseño compacto de una fila por producto */}
                 <div className="space-y-4">
@@ -5204,6 +5175,8 @@ const NewSalePage = () => {
                     )}
                   </AnimatePresence>
                 </div>
+              </div>
+            )}
               </CardContent>
             </Card>          </div>
 

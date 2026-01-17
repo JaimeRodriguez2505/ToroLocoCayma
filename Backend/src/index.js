@@ -1,6 +1,6 @@
 const {app, server} = require("./app");
 const { sequelize, connectDB } = require('./config/database');
-const { seedRoles, syncComandas } = require('./models');
+const { seedRoles, syncComandas, syncReservas } = require('./models');
 const runMigrations = require('./utils/run-migrations');
 const ensureAdminUser = require('./utils/ensure-admin-user');
 const cierreScheduler = require('./services/cierreScheduler.service');
@@ -68,6 +68,13 @@ const startServer = async () => {
       await syncComandas();
     } catch (error) {
       console.log('⚠️  Error en syncComandas (continuando):', error.message);
+    }
+
+    // 6.5. Sincronizar tabla de reservas
+    try {
+      await syncReservas();
+    } catch (error) {
+      console.log('⚠️  Error en syncReservas (continuando):', error.message);
     }
 
     // 7. Iniciar Scheduler de Cierre Automático

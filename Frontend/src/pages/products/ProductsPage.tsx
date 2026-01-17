@@ -753,9 +753,12 @@ const ProductsPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 dark:text-blue-400 mx-auto" />
-          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Cargando productos...</p>
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-primary/20 rounded-full animate-spin mx-auto"></div>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-20 border-4 border-transparent border-t-primary rounded-full animate-spin"></div>
+          </div>
+          <p className="text-lg font-medium text-muted-foreground">Cargando productos...</p>
         </div>
       </div>
     )
@@ -770,24 +773,25 @@ const ProductsPage = () => {
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 bg-card/50 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-border/20"
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card border border-border rounded-2xl p-6 shadow-sm dark:shadow-ember"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-fire-700 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-foreground flex items-center gap-3">
+              <Package className="h-8 w-8 text-primary" />
               Productos
             </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-gray-600 dark:text-gray-400">Gestiona el inventario de tus productos</p>
+            <div className="flex items-center gap-3 mt-2">
+              <p className="text-muted-foreground text-base">Gestiona el inventario de tus productos</p>
               {isSearchInputFocused && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-semibold border border-primary/20"
                 >
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                   Escáner activo
                 </motion.div>
               )}
@@ -795,17 +799,18 @@ const ProductsPage = () => {
           </div>
           <Button
             onClick={() => setIsNewProductModalOpen(true)}
-            className="bg-gradient-to-r from-toro-red to-red-600 hover:from-red-700 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            className="font-semibold dark:shadow-fire"
+            size="lg"
             disabled={createMutation.isPending}
           >
             {createMutation.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                 Creando...
               </>
             ) : (
               <>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-5 w-5 mr-2" />
                 Nuevo Producto
               </>
             )}
@@ -814,14 +819,14 @@ const ProductsPage = () => {
 
         {/* Filters */}
         <motion.div
-          className="bg-card/50 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-border/20"
+          className="bg-card border border-border rounded-2xl p-6 shadow-sm dark:shadow-ember"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative md:col-span-2">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
               <Input
                 ref={searchInputRef}
                 placeholder="Buscar por nombre, SKU o código de barras..."
@@ -829,13 +834,13 @@ const ProductsPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onFocus={() => setIsSearchInputFocused(true)}
                 onBlur={() => setIsSearchInputFocused(false)}
-                className={`pl-10 bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-toro-red dark:focus:border-toro-red rounded-xl ${
-                  isSearchInputFocused ? "ring-2 ring-toro-red/30 border-toro-red/50" : ""
+                className={`pl-12 ${
+                  isSearchInputFocused ? "ring-4 ring-primary/20 border-primary dark:shadow-primary-glow" : ""
                 }`}
               />
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="bg-white/50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 focus:border-toro-red dark:focus:border-toro-red rounded-xl">
+              <SelectTrigger>
                 <SelectValue placeholder="Filtrar por categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -847,6 +852,21 @@ const ProductsPage = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={sortType} onValueChange={setSortType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="id_desc">Más recientes</SelectItem>
+                <SelectItem value="id_asc">Más antiguos</SelectItem>
+                <SelectItem value="name_asc">Nombre A-Z</SelectItem>
+                <SelectItem value="name_desc">Nombre Z-A</SelectItem>
+                <SelectItem value="stock_asc">Stock ascendente</SelectItem>
+                <SelectItem value="stock_desc">Stock descendente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-wrap items-center gap-6 mt-4 pt-4 border-t border-border">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="zero-stock"
@@ -855,7 +875,7 @@ const ProductsPage = () => {
               />
               <label
                 htmlFor="zero-stock"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                className="text-sm font-medium text-foreground cursor-pointer"
               >
                 Solo sin stock
               </label>
@@ -873,25 +893,11 @@ const ProductsPage = () => {
                 Requieren ajuste de stock
               </label>
             </div>
-            <div>
-              <select
-                value={sortType}
-                onChange={(e) => setSortType(e.target.value)}
-                className="rounded-lg border border-gray-300 dark:border-gray-600 px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-toro-red text-sm w-full"
-              >
-                <option value="id_desc">Más recientes</option>
-                <option value="id_asc">Más antiguos</option>
-                <option value="name_asc">Nombre A-Z</option>
-                <option value="name_desc">Nombre Z-A</option>
-                <option value="stock_asc">Stock ascendente</option>
-                <option value="stock_desc">Stock descendente</option>
-              </select>
-            </div>
           </div>
         </motion.div>
 
         <motion.div
-          className="bg-card/50 backdrop-blur-sm rounded-2xl shadow-lg border border-border/20 overflow-hidden"
+          className="bg-card border border-border rounded-2xl shadow-sm dark:shadow-ember overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -901,15 +907,15 @@ const ProductsPage = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-gray-200 dark:border-gray-700">
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Imagen</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">SKU</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Nombre</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Categoría</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Precio Unitario</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Precio Mayorista</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Stock</TableHead>
-                      <TableHead className="text-gray-900 dark:text-gray-100 font-semibold">Acciones</TableHead>
+                    <TableRow className="border-border bg-muted/80">
+                      <TableHead className="font-semibold">Imagen</TableHead>
+                      <TableHead className="font-semibold">SKU</TableHead>
+                      <TableHead className="font-semibold">Nombre</TableHead>
+                      <TableHead className="font-semibold">Categoría</TableHead>
+                      <TableHead className="font-semibold">Precio Unitario</TableHead>
+                      <TableHead className="font-semibold">Precio Mayorista</TableHead>
+                      <TableHead className="font-semibold">Stock</TableHead>
+                      <TableHead className="font-semibold">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -921,7 +927,7 @@ const ProductsPage = () => {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ duration: 0.2, delay: index * 0.05 }}
-                          className="border-gray-200 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors"
+                          className="border-border hover:bg-muted/30 transition-colors"
                         >
                           <TableCell className="p-2">
                             {product.imagen_url ? (
@@ -1089,25 +1095,27 @@ const ProductsPage = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="text-sm text-gray-700 dark:text-gray-300">
-                    Mostrando {startIndex + 1} a {Math.min(endIndex, filteredProducts?.length || 0)} de{" "}
-                    {filteredProducts?.length || 0} productos
+                <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                  <div className="text-sm text-muted-foreground font-medium">
+                    Mostrando <span className="font-bold text-primary">{startIndex + 1}</span> a{" "}
+                    <span className="font-bold text-primary">{Math.min(endIndex, filteredProducts?.length || 0)}</span> de{" "}
+                    <span className="font-bold text-primary">{filteredProducts?.length || 0}</span> productos
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         setCurrentPage(Math.max(1, currentPage - 1))
-                        setRestorationCompleted(true) // Marcar que la navegación manual ha tomado control
+                        setRestorationCompleted(true)
                       }}
                       disabled={currentPage === 1}
-                      className="bg-white/50 dark:bg-gray-700/50"
+                      className="h-10"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Anterior
                     </Button>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-semibold text-foreground px-3 py-2 bg-muted/50 rounded-lg border border-border">
                       Página {currentPage} de {totalPages}
                     </span>
                     <Button
@@ -1115,12 +1123,13 @@ const ProductsPage = () => {
                       size="sm"
                       onClick={() => {
                         setCurrentPage(Math.min(totalPages, currentPage + 1))
-                        setRestorationCompleted(true) // Marcar que la navegación manual ha tomado control
+                        setRestorationCompleted(true)
                       }}
                       disabled={currentPage === totalPages}
-                      className="bg-white/50 dark:bg-gray-700/50"
+                      className="h-10"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      Siguiente
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                 </div>
@@ -1128,20 +1137,20 @@ const ProductsPage = () => {
             </>
           ) : (
             <motion.div
-              className="flex flex-col items-center justify-center py-16 text-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-200/80 dark:border-gray-700/80"
+              className="flex flex-col items-center justify-center py-24 text-center p-8"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-fire-100 dark:from-blue-900/30 dark:to-fire-900/30 flex items-center justify-center mb-6 shadow-lg">
-                <Package className="h-10 w-10 text-blue-500 dark:text-blue-400" />
+              <div className="w-40 h-40 rounded-full bg-primary/10 flex items-center justify-center mb-8 shadow-md dark:shadow-ember">
+                <Package className="h-20 w-20 text-primary" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-2xl font-heading font-bold text-foreground mb-4">
                 {searchTerm || categoryFilter !== "all" || showZeroStock || showStockInconsistencies
                   ? "No se encontraron productos"
                   : "No hay productos"}
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">
+              <p className="text-muted-foreground text-base mb-8 max-w-md leading-relaxed">
                 {searchTerm || categoryFilter !== "all" || showZeroStock || showStockInconsistencies
                   ? "No se encontraron productos que coincidan con los filtros aplicados"
                   : "Comienza creando tu primer producto para gestionar tu inventario"}
@@ -1149,13 +1158,14 @@ const ProductsPage = () => {
               {!searchTerm && categoryFilter === "all" && !showZeroStock && !showStockInconsistencies ? (
                 <Button
                   onClick={() => setIsNewProductModalOpen(true)}
-                  className="bg-gradient-to-r from-blue-600 to-fire-600 hover:from-blue-700 hover:to-fire-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                  className="font-semibold dark:shadow-fire"
+                  size="lg"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-5 w-5" />
                   Nuevo Producto
                 </Button>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -1164,7 +1174,6 @@ const ProductsPage = () => {
                       setShowZeroStock(false)
                       setShowStockInconsistencies(false)
                       setCurrentPage(1)
-                      // Re-enfocar después de limpiar filtros
                       setTimeout(() => {
                         if (searchInputRef.current) {
                           searchInputRef.current.focus()
@@ -1172,11 +1181,10 @@ const ProductsPage = () => {
                         }
                       }, 100)
                     }}
-                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
                   >
                     Limpiar filtros
                   </Button>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">o intenta con otros términos de búsqueda</p>
+                  <p className="text-sm text-muted-foreground">o intenta con otros términos de búsqueda</p>
                 </div>
               )}
             </motion.div>
@@ -1204,28 +1212,27 @@ const ProductsPage = () => {
           }
         }}
       >
-        <AlertDialogContent className="bg-card/95 backdrop-blur-sm border border-border/50 shadow-2xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/30 rounded-full">
-              <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 bg-destructive/10 rounded-full">
+              <AlertTriangle className="h-10 w-10 text-destructive" />
             </div>
-            <AlertDialogTitle className="text-xl font-semibold text-center text-gray-900 dark:text-gray-100">
+            <AlertDialogTitle className="text-xl font-heading font-bold text-center">
               Eliminar producto
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-gray-600 dark:text-gray-400">
+            <AlertDialogDescription className="text-center">
               ¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-center space-x-3 mt-6">
             <AlertDialogCancel
               onClick={() => handleModalClose(() => setShowDeleteDialog(false))}
-              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-destructive hover:bg-destructive/90"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar
@@ -1247,7 +1254,7 @@ const ProductsPage = () => {
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Códigos de Barras</DialogTitle>
+            <DialogTitle className="font-heading font-bold">Códigos de Barras</DialogTitle>
             <DialogDescription>Códigos asociados a este producto</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">

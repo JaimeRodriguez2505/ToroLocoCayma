@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  /* Paleta de Fuego y Brasas */
+  --color-brand-black: #0a0a0a;
+  --color-brand-dark: #121212;
+  --color-brand-charcoal: #1f1f1f;
+  
+  --color-brand-red: #dc2626;
+  --color-brand-orange: #f97316;
+  --color-brand-amber: #fbbf24;
+  --color-brand-yellow: #fcd34d;
+  
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #a3a3a3;
+  --color-text-muted: #525252;
+
+  --font-display: sans-serif;
+  --font-body: sans-serif;
+  --font-brush: cursive;
+}
+
+@theme inline {
+  --color-background: var(--color-brand-black);
+  --color-foreground: var(--color-text-primary);
+  
+  --color-toro-black: var(--color-brand-black);
+  --color-toro-dark: var(--color-brand-dark);
+  --color-toro-charcoal: var(--color-brand-charcoal);
+  
+  --color-toro-red: var(--color-brand-red);
+  --color-toro-orange: var(--color-brand-orange);
+  --color-toro-amber: var(--color-brand-amber);
+  
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-brush: var(--font-brush);
+}
+
+/* Animations */
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-100px) scale(0); opacity: 0; }
+}
+
+.animate-float-up {
+  animation: float-up 4s ease-out infinite;
+}
+
+/* Custom Button Styles */
+.btn-red-gradient {
+  background: white;
+  color: black;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 2rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-red-gradient:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background-color: var(--color-brand-black);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+}
+
+/* Override Tailwind defaults if necessary */
+/* .font-sans, .font-display, .font-body {
+  font-family: var(--font-brush) !important;
+} */
+
+.font-brush {
+  font-family: var(--font-brush);
+}
+
+/* Efecto de textura de ruido sutil */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(251, 191, 36, 0.3); /* amber-400 opacity 30% */
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(251, 191, 36, 0.8); /* amber-400 opacity 80% */
+}
+
+/* Utilería para ocultar scrollbar pero permitir funcionalidad (para móviles si se desea) */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

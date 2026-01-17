@@ -18,6 +18,8 @@ const storage = multer.diskStorage({
             cb(null, path.join(__dirname, '../uploads/banner'));
         } else if (file.fieldname === 'imagen_tarjeta') {
             cb(null, path.join(__dirname, '../uploads/tarjetas'));
+        } else if (file.fieldname === 'comprobante_reserva') {
+            cb(null, path.join(__dirname, '../uploads/reservas'));
         } else {
             cb(new Error('Tipo de archivo no permitido'), null);
         }
@@ -70,6 +72,12 @@ const fileFilter = (req, file, cb) => {
             cb(null, true);
         } else {
             cb(new Error('Solo se permiten imágenes para la tarjeta'));
+        }
+    } else if (file.fieldname === 'comprobante_reserva') {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten imágenes para el comprobante'));
         }
     } else {
         cb(null, false);

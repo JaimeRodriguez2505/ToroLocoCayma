@@ -7,39 +7,39 @@ import { Loader2 } from "lucide-react"
 import { cn } from "../../lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 touch-manipulation",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 touch-manipulation",
   {
     variants: {
       variant: {
-        // Fire (primary brand) - DEFAULT
-        default: "bg-fire-500 text-white hover:bg-fire-600 active:bg-fire-700 shadow-md hover:shadow-lg",
+        // Primary (default) - Rojo intenso con glow en dark
+        default: "bg-primary text-white hover:bg-primary/90 shadow-md dark:shadow-fire dark:hover:shadow-fire-lg",
 
-        // Ember (secondary brand)
-        secondary: "bg-ember-500 text-white hover:bg-ember-600 active:bg-ember-700 shadow-md hover:shadow-lg",
+        // Secondary
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
 
         // Destructive
-        destructive: "bg-destructive text-destructive-foreground hover:bg-ember-600 shadow-md",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md",
 
-        // Outline
-        outline: "border-2 border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 hover:border-fire-500 hover:text-fire-600 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-100 dark:hover:border-fire-500",
+        // Outline - Border más grueso
+        outline: "border-2 border-border bg-background text-foreground hover:bg-accent hover:border-primary/50",
 
         // Ghost
-        ghost: "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-700",
+        ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
 
         // Link
-        link: "text-fire-500 underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline",
 
-        // Fire Glow (with shadow effect)
-        fire: "bg-fire-500 text-white hover:bg-fire-600 shadow-fire hover:shadow-fire-lg",
+        // Fire Glow (con sombra intensa)
+        fire: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-fire hover:shadow-fire-lg",
 
         // Ember Glow
-        ember: "bg-ember-500 text-white hover:bg-ember-600 shadow-ember",
+        ember: "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-ember",
 
         // Success
-        success: "bg-success text-success-foreground hover:bg-success/90 shadow-md",
+        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
 
         // Warning
-        warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-md",
+        warning: "bg-amber-500 text-white hover:bg-amber-600 shadow-md",
       },
       size: {
         sm: "h-9 px-3.5 text-sm rounded-md gap-1.5",

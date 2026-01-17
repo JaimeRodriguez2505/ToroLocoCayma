@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Loader2, Image, Upload, FileImage, X } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Image, Upload, FileImage, X, MessageSquare, Type, AlignLeft } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 import { getBanners, createBannerCarrusel, updateBannerCarrusel, deleteBannerCarrusel } from "../../services/marketingService";
 
 // Componente para gestionar múltiples banners
@@ -24,14 +26,17 @@ const BannerListManager: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  
+  // Estados para los campos de texto
+  const [titulo, setTitulo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
 
   const createMutation = useMutation({
     mutationFn: createBannerCarrusel,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banners"] });
-      setIsNewModalOpen(false);
-      setFile(null);
-      setPreviewUrl(null);
+      closeModal();
       toast.success("Banner creado exitosamente");
     },
     onError: (error: any) => {
@@ -43,10 +48,7 @@ const BannerListManager: React.FC = () => {
     mutationFn: ({ id, data }: { id: number; data: any }) => updateBannerCarrusel(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banners"] });
-      setIsEditModalOpen(false);
-      setFile(null);
-      setPreviewUrl(null);
-      setSelectedBanner(null);
+      closeModal();
       toast.success("Banner actualizado exitosamente");
     },
     onError: (error: any) => {
@@ -69,6 +71,9 @@ const BannerListManager: React.FC = () => {
   const handleNew = () => {
     setFile(null);
     setPreviewUrl(null);
+    setTitulo("");
+    setDescripcion("");
+    setWhatsapp("");
     setIsNewModalOpen(true);
   };
 
@@ -76,6 +81,9 @@ const BannerListManager: React.FC = () => {
     setSelectedBanner(banner);
     setFile(null);
     setPreviewUrl(null);
+    setTitulo(banner.titulo || "");
+    setDescripcion(banner.descripcion || "");
+    setWhatsapp(banner.whatsapp || "");
     setIsEditModalOpen(true);
   };
 
@@ -139,11 +147,23 @@ const BannerListManager: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) {
+    
+    // Validar que haya imagen solo si es creación
+    if (!selectedBanner && !file) {
       toast.error("Debe seleccionar una imagen");
       return;
     }
-    const dataToSubmit = { imagen: file };
+
+    const dataToSubmit: any = {
+      titulo,
+      descripcion,
+      whatsapp
+    };
+
+    if (file) {
+      dataToSubmit.imagen = file;
+    }
+
     if (selectedBanner) {
       updateMutation.mutate({ id: selectedBanner.id_banner, data: dataToSubmit });
     } else {
@@ -156,6 +176,9 @@ const BannerListManager: React.FC = () => {
     setIsEditModalOpen(false);
     setSelectedBanner(null);
     setFile(null);
+    setTitulo("");
+    setDescripcion("");
+    setWhatsapp("");
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
@@ -233,12 +256,33 @@ const BannerListManager: React.FC = () => {
                       onClick={() => handleImageClick(banner.imagen_url)}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 cursor-pointer" onClick={() => handleImageClick(banner.imagen_url)} />
+                    
+                    {/* Badge para mostrar si tiene título/descripción */}
+                    {(banner.titulo || banner.descripcion) && (
+                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                        <Type className="h-3 w-3" />
+                        <span>Con contenido</span>
+                      </div>
+                    )}
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <FileImage className="h-4 w-4" />
                       <span>Banner promocional</span>
                     </div>
+                    
+                    {/* Previsualización del contenido */}
+                    {(banner.titulo || banner.descripcion) && (
+                      <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg text-sm space-y-1">
+                        {banner.titulo && (
+                          <p className="font-bold text-gray-900 dark:text-gray-100 truncate">{banner.titulo}</p>
+                        )}
+                        {banner.descripcion && (
+                          <p className="text-gray-600 dark:text-gray-400 truncate text-xs">{banner.descripcion}</p>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
@@ -268,87 +312,149 @@ const BannerListManager: React.FC = () => {
 
       {/* Modal para crear/editar banner - DISEÑO MEJORADO */}
       <Dialog open={isNewModalOpen || isEditModalOpen} onOpenChange={closeModal}>
-        <DialogContent className="sm:max-w-[540px] bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl" aria-describedby="banner-dialog-description">
+        <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl max-h-[90vh] overflow-y-auto" aria-describedby="banner-dialog-description">
           <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
             <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Image className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               {selectedBanner ? "Editar Banner" : "Nuevo Banner"}
             </DialogTitle>
             <DialogDescription id="banner-dialog-description" className="text-gray-600 dark:text-gray-400 text-sm">
-              {selectedBanner ? "Selecciona una nueva imagen para reemplazar la actual" : "Selecciona una imagen para crear un nuevo banner promocional"}
+              {selectedBanner ? "Edita la información del banner o cambia su imagen" : "Completa la información para crear un nuevo banner"}
             </DialogDescription>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="imagen" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Imagen del Banner *
-              </Label>
-              
-              {/* Mostrar previsualización de la imagen si existe */}
-              {previewUrl ? (
-                <div className="relative bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-600">
-                  <div className="relative group">
-                    <img 
-                      src={previewUrl} 
-                      alt="Preview" 
-                      className="w-full h-48 object-cover rounded-lg shadow-md cursor-pointer"
-                      onClick={() => handleImageClick(previewUrl)}
+            <div className="grid gap-6">
+              {/* Sección de Imagen */}
+              <div className="space-y-3">
+                <Label htmlFor="imagen" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Imagen del Banner *
+                </Label>
+                
+                {/* Mostrar previsualización de la imagen si existe */}
+                {previewUrl || (selectedBanner && !file) ? (
+                  <div className="relative bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-600">
+                    <div className="relative group">
+                      <img 
+                        src={previewUrl || selectedBanner?.imagen_url} 
+                        alt="Preview" 
+                        className="w-full h-48 object-cover rounded-lg shadow-md cursor-pointer"
+                        onClick={() => handleImageClick(previewUrl || selectedBanner?.imagen_url)}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-lg" />
+                      
+                      {/* Solo mostrar botón de eliminar si es una nueva imagen o si queremos permitir eliminar la actual (aunque la lógica actual requiere subir una nueva) */}
+                      {file && (
+                        <Button
+                          type="button"
+                          onClick={handleRemoveFile}
+                          className="absolute top-2 right-2 h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                      
+                      {/* Si estamos editando y no hay archivo nuevo seleccionado, mostrar overlay para indicar que se puede cambiar */}
+                      {!file && selectedBanner && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                          <div className="bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            Para cambiar, sube una nueva imagen abajo
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-3 text-center">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {file ? `Nueva imagen: ${file.name}` : 'Imagen actual'}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Zona de carga siempre visible si no hay preview, o visible debajo si estamos editando para permitir cambio */}
+                {(!previewUrl && !selectedBanner) || (selectedBanner) ? (
+                  <div
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ${
+                      dragActive 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                    } ${selectedBanner && !file ? 'mt-4' : ''}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      id="imagen"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      required={!selectedBanner}
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-lg" />
-                    <Button
-                      type="button"
-                      onClick={handleRemoveFile}
-                      className="absolute top-2 right-2 h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="space-y-2">
+                      <div className="flex justify-center">
+                        <Upload className={`h-8 w-8 ${dragActive ? 'text-blue-500' : 'text-gray-400'} transition-colors`} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {selectedBanner ? 'Cambiar imagen (opcional)' : 'Subir imagen'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          PNG, JPG, GIF hasta 10MB
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-3 text-center">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Imagen seleccionada: {file?.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Haz clic en la X para cambiar la imagen
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                /* Zona de drag and drop mejorada */
-                <div
-                  className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
-                    dragActive 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    id="imagen"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    required
+                ) : null}
+              </div>
+
+              {/* Campos de Texto */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="titulo" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Type className="h-4 w-4 text-blue-500" />
+                    Título Principal
+                  </Label>
+                  <Input
+                    id="titulo"
+                    placeholder="Ej: BIENVENIDO A TORO LOCO"
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    className="border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
                   />
-                  <div className="space-y-4">
-                    <div className="flex justify-center">
-                      <Upload className={`h-12 w-12 ${dragActive ? 'text-blue-500' : 'text-gray-400'} transition-colors`} />
-                    </div>
-                    <div>
-                      <p className="text-base font-medium text-gray-900 dark:text-gray-100">
-                        {dragActive ? 'Suelta la imagen aquí' : 'Arrastra una imagen o haz clic para seleccionar'}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        PNG, JPG, GIF hasta 10MB
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-xs text-gray-500">Este texto aparecerá en grande sobre el banner</p>
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="descripcion" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <AlignLeft className="h-4 w-4 text-blue-500" />
+                    Subtítulo / Descripción
+                  </Label>
+                  <Textarea
+                    id="descripcion"
+                    placeholder="Ej: Parrillería & Restaurante"
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
+                    className="min-h-[80px] border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
+                  />
+                  <p className="text-xs text-gray-500">Aparecerá debajo del título principal</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <MessageSquare className="h-4 w-4 text-green-500" />
+                    WhatsApp (Opcional)
+                  </Label>
+                  <Input
+                    id="whatsapp"
+                    placeholder="Ej: 51987654321"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    className="border-gray-300 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400"
+                  />
+                </div>
+              </div>
             </div>
 
             <DialogFooter className="pt-4 border-t border-gray-100 dark:border-gray-800 gap-3">
@@ -362,7 +468,7 @@ const BannerListManager: React.FC = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={createMutation.isPending || updateMutation.isPending || !file}
+                disabled={createMutation.isPending || updateMutation.isPending || (!selectedBanner && !file)}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-ember-600 hover:from-blue-700 hover:to-ember-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {(createMutation.isPending || updateMutation.isPending) ? (
@@ -390,6 +496,9 @@ const BannerListManager: React.FC = () => {
               <Image className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Vista previa del banner
             </DialogTitle>
+            <DialogDescription className="hidden">
+              Vista ampliada de la imagen del banner
+            </DialogDescription>
           </DialogHeader>
           
           <div className="px-4 pb-4">

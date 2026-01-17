@@ -17,6 +17,16 @@ const Banner = sequelize.define('Banner', {
     allowNull: true,
     comment: 'Número de WhatsApp para contacto'
   },
+  titulo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Título del banner'
+  },
+  descripcion: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Descripción del banner'
+  },
   creado_en: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
