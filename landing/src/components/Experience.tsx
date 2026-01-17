@@ -16,19 +16,19 @@ export default function Experience() {
 
   const cards = [
     {
-      src: "https://images.unsplash.com/photo-1558030006-4506719337d0?q=80&w=800&auto=format&fit=crop",
+      src: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=high%20quality%20raw%20steak%20meat%20on%20black%20stone%20board%2C%20dark%20mood%20lighting%2C%20professional%20food%20photography&image_size=portrait_4_3",
       alt: "Corte de carne premium",
       title: "Cortes Premium",
       desc: "Selección exclusiva"
     },
     {
-      src: "https://images.unsplash.com/photo-1511978293554-7b92f19bd77d?q=80&w=800&auto=format&fit=crop",
+      src: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=people%20toasting%20wine%20glasses%20in%20a%20luxury%20dark%20restaurant%2C%20bokeh%20background%2C%20elegant%20atmosphere&image_size=portrait_4_3",
       alt: "Brindis con amigos",
       title: "Ambiente",
       desc: "Inigualable y acogedor"
     },
     {
-      src: "https://images.unsplash.com/photo-1585109649139-366815a0d713?q=80&w=800&auto=format&fit=crop",
+      src: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=chef%20cooking%20steak%20on%20flaming%20grill%2C%20fire%20and%20smoke%2C%20dramatic%20lighting%2C%20cinematic&image_size=portrait_4_3",
       alt: "Platos deliciosos",
       title: "Sabor",
       desc: "Tradición y fuego"

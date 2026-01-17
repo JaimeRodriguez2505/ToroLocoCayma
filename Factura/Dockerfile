@@ -14,6 +14,10 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libxslt-dev \
     default-mysql-client \
+    cron \
+    supervisor \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip soap
 
 # Instalar Composer
@@ -37,6 +41,12 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Copiar configuración de PHP-FPM
 COPY php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Copiar crontab y configurarlo
+COPY crontab /etc/cron.d/laravel-cron
+RUN chmod 0644 /etc/cron.d/laravel-cron \
+    && crontab /etc/cron.d/laravel-cron \
+    && touch /var/log/cron.log
 
 # Copiar y configurar entrypoint
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

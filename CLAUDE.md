@@ -11,7 +11,7 @@ This is "TikTrendry" (formerly ERP-Restaurantes Toro Loco), a complete restauran
 - **Frontend**: React 19 + TypeScript + Vite with Tailwind CSS and shadcn/ui
 - **Factura (Invoicing)**: Laravel PHP application for electronic invoicing (SUNAT integration for Peru)
 - **Database**: MySQL 8.0
-- **Deployment**: Docker Compose with 5 services
+- **Deployment**: Docker Compose with 9 services (separated databases, Redis, Gateway)
 
 ## Architecture
 
@@ -19,7 +19,8 @@ The application follows a microservices-like architecture with three main applic
 
 ### 1. Backend (Node.js/Express)
 - **Location**: `./Backend/`
-- **Port**: 3000
+- **Port**: 4240 (exposed), 3000 (internal)
+- **Database**: `tiktrendry_erp` (MySQL, port 3307)
 - **Structure**:
   - `src/models/`: Sequelize models (18+ models including User, Producto, Venta, CierreCaja, etc.)
   - `src/controllers/`: Business logic for each entity
@@ -42,7 +43,7 @@ The application follows a microservices-like architecture with three main applic
 
 ### 2. Frontend (React + TypeScript)
 - **Location**: `./Frontend/`
-- **Port**: 8080 (production), 5173 (dev via Vite)
+- **Port**: 4242 (exposed), 80 (internal), 5173 (dev via Vite)
 - **Structure**:
   - `src/pages/`: Route-based page components
   - `src/components/`: Reusable UI components (shadcn/ui + custom)
@@ -65,11 +66,16 @@ The application follows a microservices-like architecture with three main applic
 
 ### 3. Factura (Laravel PHP)
 - **Location**: `./Factura/`
-- **Port**: 8000
+- **Port**: 4244 (exposed), 80 (internal)
+- **Database**: `tiktrendry_factura` (MySQL, port 3308)
 - **Purpose**: Electronic invoicing (e-facturación) integration with SUNAT (Peru's tax authority)
 - **Services**:
-  - `factura-php`: PHP-FPM container
-  - `factura-nginx`: Nginx web server
+  - `factura-php`: PHP-FPM container (tiktrendry-factura-php)
+  - `factura-nginx`: Nginx web server (tiktrendry-factura-nginx)
+
+### 4. Landing Page (Next.js)
+- **Location**: `./landing/`
+- **Port**: 4243 (exposed), 3000 (internal)
 
 ## Common Development Commands
 
@@ -106,7 +112,9 @@ npm start                         # Uses nodemon for auto-reload
 # - Starts automatic cash closing scheduler
 ```
 
-**Database Connection**: The backend expects MySQL at `db:3306` (Docker) or `localhost:3306` (local). Credentials defined in `.env` file.
+**Database Connection**: The backend expects MySQL at `db-erp:3306` (Docker) or `localhost:3307` (local). Database name is `tiktrendry_erp`. Credentials defined in `.env` file.
+
+**IMPORTANT**: Backend and Factura now use **separate databases** to avoid table conflicts (especially the `users` table).
 
 ### Frontend Development
 
@@ -247,16 +255,55 @@ Laravel standard configuration plus SUNAT API credentials for e-invoicing.
 
 ## Docker Services
 
-The `docker-compose.yml` defines 5 services:
+The `docker-compose.yml` defines 9 services with **separated databases** to avoid table conflicts:
 
-1. **backend** (Node.js): Port 3000, depends on db
-2. **db** (MySQL 8.0): Port 3306, persistent volume `db_data`
-3. **frontend** (Nginx + React build): Port 8080
-4. **factura-php** (PHP-FPM): Laravel application
-5. **factura-nginx** (Nginx): Port 8000, serves Factura app
+### Database Services (Separated)
+1. **db-erp** (MySQL 8.0): Port 3307, database `tiktrendry_erp`, container `tiktrendry-db-erp`
+   - Used exclusively by Backend
+   - Persistent volume `db_erp_data`
 
-**Shared Volumes**:
-- `./Backend/src/uploads/certs` and `./Backend/src/uploads/logos` are mounted to both Backend and Factura services for certificate and logo file sharing
+2. **db-factura** (MySQL 8.0): Port 3308, database `tiktrendry_factura`, container `tiktrendry-db-factura`
+   - Used exclusively by Factura service
+   - Persistent volume `db_factura_data`
+   - **Solves the "users table conflict" issue**
+
+3. **redis** (Redis 7): Port 6380, container `tiktrendry-redis`
+   - Shared cache and session store
+   - Used by both Backend and Factura
+
+### Application Services
+4. **backend** (Node.js): Port 4240, container `tiktrendry-backend`
+   - Connects to db-erp
+   - Health checks enabled
+
+5. **frontend** (React + Nginx): Port 4242, container `tiktrendry-frontend`
+   - Built React application served by Nginx
+
+6. **landing** (Next.js): Port 4243, container `tiktrendry-landing`
+   - Marketing/landing page
+
+7. **factura-php** (PHP-FPM): Container `tiktrendry-factura-php`
+   - Connects to db-factura
+   - Laravel application
+
+8. **factura-nginx** (Nginx): Port 4244, container `tiktrendry-factura-nginx`
+   - Serves Factura app
+
+9. **nginx-gateway** (Nginx): Ports 80/443, container `tiktrendry-gateway`
+   - Reverse proxy for all services
+   - Routes: `/` (landing), `/api/` (backend), `/erp/` (frontend), `/factura/` (factura)
+
+### Volume Architecture
+**Database Volumes** (persistent):
+- `db_erp_data`: ERP database data
+- `db_factura_data`: Factura database data
+- `redis_data`: Redis cache data
+
+**Application Volumes**:
+- `./Backend/src/uploads`: File uploads (shared read-only with Factura for certs/logos)
+- `backend_logs`, `factura_logs`, `factura_nginx_logs`, `gateway_logs`: Service logs
+
+**Key Change**: Databases are now **completely separated**, eliminating the "users table already exists" error when running migrations.
 
 ## Important Notes
 
@@ -295,10 +342,53 @@ Protected routes require authentication. Some routes have additional `requiresBu
 
 ### Database errors
 - Check MySQL container status: `docker-compose ps`
-- Access MySQL directly: `docker exec -it tiktendry-mysql mysql -utiktendry -ptiktendry tiktendry`
+- Access MySQL ERP directly: `docker exec -it tiktrendry-db-erp mysql -uroot -p` (database: `tiktrendry_erp`)
+- Access MySQL Factura directly: `docker exec -it tiktrendry-db-factura mysql -uroot -p` (database: `tiktrendry_factura`)
 - Review migration logs on Backend startup
+
+### "Table users already exists" error
+✅ **This issue is now RESOLVED**. Backend and Factura use separate databases:
+- Backend uses `tiktrendry_erp` (port 3307)
+- Factura uses `tiktrendry_factura` (port 3308)
+
+If you still see this error, verify your `.env` files have the correct database names.
 
 ### Scheduler not running
 - Check Backend logs for scheduler initialization
 - Verify timezone settings (TZ=America/Lima)
 - Manually trigger: `POST /api/scheduler/run-for-date` with auth token
+
+## Production Deployment
+
+For production deployment, see **DEPLOYMENT.md** which includes:
+- Complete setup guide for VPS
+- Environment configuration
+- SSL/HTTPS setup with Let's Encrypt
+- Backup and restore procedures
+- Security checklist
+- Monitoring and troubleshooting
+
+### Quick Start for Production
+
+1. Copy environment template:
+   ```bash
+   cp .env.production .env
+   ```
+
+2. Update all passwords in `.env` (CRITICAL!)
+
+3. Build and start services:
+   ```bash
+   ./gestor.sh
+   # Select option 1 to start all services
+   ```
+
+4. The improved `gestor.sh` script provides:
+   - Service management (start/stop/restart)
+   - Log viewing for all services
+   - Database access and backups
+   - Resource monitoring
+   - Migrations runner
+   - Cleanup utilities
+
+See `./gestor.sh` menu for all available options.

@@ -1,5 +1,5 @@
 // URL del backend de facturación
-const FACTURADOR_API_URL = import.meta.env.VITE_FACTURADOR_API_URL || "http://localhost:8000/api"
+const FACTURADOR_API_URL = import.meta.env.VITE_FACTURADOR_API_URL || "http://localhost:4244/api"
 // URL del backend principal
 import { API_URL } from "../config/api"
 import { DateTime } from "luxon"

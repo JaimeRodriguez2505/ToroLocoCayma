@@ -1,7 +1,7 @@
 -- Migración para añadir campos de delivery a comandas
 -- Ejecutar antes de iniciar la aplicación
 
-USE tiktendry;
+USE toroloco_erp;
 
 -- Agregar campos si no existen (MySQL compatible)
 ALTER TABLE comandas 

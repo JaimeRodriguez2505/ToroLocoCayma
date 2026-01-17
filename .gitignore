@@ -1,0 +1,58 @@
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Backups
+backups/
+*.sql
+*.sql.gz
+
+# Docker volumes data (these are managed by Docker)
+db_erp_data/
+db_factura_data/
+redis_data/
+
+# Logs
+*.log
+logs/
+backend_logs/
+factura_logs/
+factura_nginx_logs/
+gateway_logs/
+
+# SSL Certificates (manage these separately)
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.key
+docker/nginx/ssl/*.crt
+
+# OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (should be in Backend/Frontend .gitignore but just in case)
+node_modules/
+
+# PHP vendor (should be in Factura/.gitignore but just in case)
+vendor/
+
+# Upload directories (keep structure but not files)
+Backend/src/uploads/productos/*
+!Backend/src/uploads/productos/.gitkeep
+Backend/src/uploads/certs/*
+!Backend/src/uploads/certs/.gitkeep
+Backend/src/uploads/logos/*
+!Backend/src/uploads/logos/.gitkeep
+Backend/src/uploads/reservas/*
+!Backend/src/uploads/reservas/.gitkeep

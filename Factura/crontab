@@ -1,0 +1,2 @@
+# Sincronizar empresas desde ERP cada minuto
+* * * * * cd /var/www/html && /usr/local/bin/php artisan sync:companies >> /var/log/cron.log 2>&1

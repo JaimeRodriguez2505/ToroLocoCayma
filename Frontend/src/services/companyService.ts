@@ -71,6 +71,11 @@ export const fetchCompanyForSales = async () => {
       return fallbackResponse.data.data;
     }
     
+    // Si la respuesta es exitosa pero no tiene la estructura esperada, intentar devolver directamente la data
+    if (fallbackResponse.data) {
+       return fallbackResponse.data;
+    }
+    
     throw new Error('No se encontró información de empresa');
   } catch (error) {
     console.error('Error al obtener empresa para ventas:', error);

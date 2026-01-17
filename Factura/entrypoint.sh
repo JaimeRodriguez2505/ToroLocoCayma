@@ -2,21 +2,27 @@
 set -e
 
 # Configurar variables de entorno por defecto si no existen
-export APP_NAME=${APP_NAME:-TikTrendyFacturador}
+export APP_NAME=${APP_NAME:-ToroLocoFacturador}
 export APP_ENV=${APP_ENV:-production}
 export APP_DEBUG=${APP_DEBUG:-false}
 export APP_TIMEZONE=${APP_TIMEZONE:-America/Lima}
-export APP_URL=${APP_URL:-http://localhost:8000}
+export APP_URL=${APP_URL:-http://localhost:4244}
 export DB_CONNECTION=${DB_CONNECTION:-mysql}
-export DB_HOST=${DB_HOST:-db}
+export DB_HOST=${DB_HOST:-db-factura}
 export DB_PORT=${DB_PORT:-3306}
-export DB_DATABASE=${DB_DATABASE:-tiktendry}
-export DB_USERNAME=${DB_USERNAME:-tiktendry}
-export DB_PASSWORD=${DB_PASSWORD:-tiktendry}
+export DB_DATABASE=${DB_DATABASE:-toroloco_factura}
+export DB_USERNAME=${DB_USERNAME:-toroloco_factura}
+export DB_PASSWORD=${DB_PASSWORD:-factura_password_change_me}
 export LOG_LEVEL=${LOG_LEVEL:-error}
-export SESSION_DRIVER=${SESSION_DRIVER:-database}
-export CACHE_STORE=${CACHE_STORE:-database}
-export QUEUE_CONNECTION=${QUEUE_CONNECTION:-database}
+export SESSION_DRIVER=${SESSION_DRIVER:-redis}
+export CACHE_STORE=${CACHE_STORE:-redis}
+export QUEUE_CONNECTION=${QUEUE_CONNECTION:-redis}
+
+# Variables para conexión a base de datos ERP (sincronización)
+export ERP_DB_HOST=${ERP_DB_HOST:-db-erp}
+export ERP_DB_DATABASE=${ERP_DB_DATABASE:-toroloco_erp}
+export ERP_DB_USERNAME=${ERP_DB_USERNAME:-toroloco}
+export ERP_DB_PASSWORD=${ERP_DB_PASSWORD:-toroloco_change_me}
 
 # Crear archivo .env si no existe
 if [ ! -f .env ]; then
@@ -69,6 +75,12 @@ MAIL_FROM_ADDRESS="hello@example.com"
 MAIL_FROM_NAME="\${APP_NAME}"
 
 VITE_APP_NAME="\${APP_NAME}"
+
+# Conexión a base de datos ERP para sincronización
+ERP_DB_HOST=${ERP_DB_HOST}
+ERP_DB_DATABASE=${ERP_DB_DATABASE}
+ERP_DB_USERNAME=${ERP_DB_USERNAME}
+ERP_DB_PASSWORD=${ERP_DB_PASSWORD}
 EOF
     echo "✅ Archivo .env creado correctamente."
     
@@ -98,14 +110,41 @@ echo "✅ Conexión a base de datos establecida."
 echo "🔄 Ejecutando migraciones..."
 php artisan migrate --force || echo "⚠️ Migraciones fallaron o no necesarias"
 
+# Esperar a que la base de datos ERP esté disponible
+echo "🔗 Verificando conexión a base de datos ERP..."
+RETRY_COUNT=0
+MAX_RETRIES=30
+until mysqladmin ping -h"$ERP_DB_HOST" -u"$ERP_DB_USERNAME" -p"$ERP_DB_PASSWORD" --silent --skip-ssl 2>/dev/null; do
+    RETRY_COUNT=$((RETRY_COUNT+1))
+    if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+        echo "⚠️  No se pudo conectar a la base de datos ERP después de $MAX_RETRIES intentos"
+        echo "⚠️  La sincronización de empresas se omitirá"
+        break
+    fi
+    echo "Esperando conexión a base de datos ERP... (Intento $RETRY_COUNT/$MAX_RETRIES)"
+    sleep 2
+done
+
+if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+    echo "✅ Conexión a base de datos ERP establecida."
+
+    # Sincronizar empresas desde ERP
+    echo "🔄 Sincronizando empresas desde ERP..."
+    php artisan sync:companies || echo "⚠️ No se pudieron sincronizar empresas"
+fi
+
 # NOTA: No cacheamos la configuración para permitir lectura dinámica del .env
 echo "⚡ Limpiando caches para lectura dinámica..."
 php artisan config:clear || echo "Config cache ya estaba limpio"
-php artisan route:clear || echo "Route cache ya estaba limpio"  
+php artisan route:clear || echo "Route cache ya estaba limpio"
 php artisan view:clear || echo "View cache ya estaba limpio"
 
 # Asegurar permisos correctos
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Iniciar cron en segundo plano
+echo "⏰ Iniciando cron para sincronización automática..."
+service cron start
 
 echo "🚀 Iniciando PHP-FPM..."
 exec "$@"

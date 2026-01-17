@@ -45,6 +45,9 @@ app.use(cors({
     'http://127.0.0.1:4244',
     'http://localhost:5173',      // Frontend dev
     'http://127.0.0.1:5173',
+    'http://127.0.0.1:3033',
+    'http://localhost:3033',
+
   ],
   credentials: true
 }))
