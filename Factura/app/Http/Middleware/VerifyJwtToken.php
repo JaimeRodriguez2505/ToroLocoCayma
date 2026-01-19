@@ -20,7 +20,8 @@ class VerifyJwtToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->header('Authorization');
+        // Usar bearerToken() para extraer automáticamente el token sin el prefijo "Bearer "
+        $token = $request->bearerToken();
         if (!$token) {
             return $this->corsResponse(['message' => 'Token no proporcionado'], 401);
         }

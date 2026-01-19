@@ -1175,9 +1175,10 @@ const ventaController = {
       // Importar controlador de comandas dinámicamente para evitar dependencia circular
       const comandaController = require('./comanda.controller');
       const comandaDelivery = await comandaController.crearComandaDeliveryAutomatica(
-        productos, 
-        id_cajero, 
-        observacionesConVenta
+        productos,
+        id_cajero,
+        observacionesConVenta,
+        venta_id
       );
 
       if (comandaDelivery) {

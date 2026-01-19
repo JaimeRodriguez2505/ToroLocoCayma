@@ -1,8 +1,9 @@
-// URL del backend de facturación
-const FACTURADOR_API_URL = import.meta.env.VITE_FACTURADOR_API_URL || "http://localhost:4244/api"
-// URL del backend principal
-import { API_URL } from "../config/api"
+// URLs del backend principal y facturador
+import { API_URL, FACTURADOR_API_URL } from "../config/api"
 import { DateTime } from "luxon"
+
+// Helper: asegurar formato Bearer SIEMPRE
+const getAuthHeader = (token: string) => (token.startsWith("Bearer ") ? token : `Bearer ${token}`)
 
 // Interfaz para la respuesta de SUNAT
 export interface SunatResponse {
@@ -17,9 +18,6 @@ export interface InvoiceSendResponse {
   hash: string
   sunatResponse: SunatResponse
 }
-
-// Modificar las interfaces para incluir el tipo de documento y datos del cliente
-// Buscar la interfaz InvoiceData y añadir el campo descuentoGlobal:
 
 // Modificar la interfaz InvoiceData para incluir el campo descuentoGlobal
 export interface InvoiceData {
@@ -99,8 +97,6 @@ export interface ClienteConsultaResponse {
   apellidoMaterno?: string
 }
 
-// Modificar las funciones consultarRuc y consultarDni para usar el backend local
-
 // Función para consultar RUC
 export const consultarRuc = async (ruc: string): Promise<ClienteConsultaResponse> => {
   const token = localStorage.getItem("token")
@@ -108,11 +104,11 @@ export const consultarRuc = async (ruc: string): Promise<ClienteConsultaResponse
   if (!token) {
     throw new Error("No se encontró token de autenticación")
   }
-  // Usar la URL del backend principal
+
   const response = await fetch(`${API_URL}/ruc/${ruc}`, {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: getAuthHeader(token),
     },
   })
 
@@ -121,11 +117,10 @@ export const consultarRuc = async (ruc: string): Promise<ClienteConsultaResponse
   }
 
   const data = await response.json()
-  console.log('Datos RUC recibidos:', data) // Log para depuración
+  console.log("Datos RUC recibidos:", data)
 
-  // Adaptar la respuesta al formato esperado por el frontend
   return {
-    tipoDocumento: "6", // RUC
+    tipoDocumento: "6",
     numeroDocumento: ruc,
     razonSocial: data.razon_social,
     direccion: data.direccion,
@@ -141,11 +136,11 @@ export const consultarDni = async (dni: string): Promise<ClienteConsultaResponse
   if (!token) {
     throw new Error("No se encontró token de autenticación")
   }
-  // Usar la URL del backend principal
+
   const response = await fetch(`${API_URL}/dni/${dni}`, {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: getAuthHeader(token),
     },
   })
 
@@ -154,11 +149,10 @@ export const consultarDni = async (dni: string): Promise<ClienteConsultaResponse
   }
 
   const data = await response.json()
-  console.log('Datos DNI recibidos:', data) // Log para depuración
+  console.log("Datos DNI recibidos:", data)
 
-  // Adaptar la respuesta al formato esperado por el frontend
   return {
-    tipoDocumento: "1", // DNI
+    tipoDocumento: "1",
     numeroDocumento: dni,
     nombre: data.full_name,
     apellidoPaterno: data.first_last_name,
@@ -169,7 +163,6 @@ export const consultarDni = async (dni: string): Promise<ClienteConsultaResponse
 
 // Función para validar los datos de la factura
 export const validateInvoiceData = (data: InvoiceData): boolean => {
-  // Verificar que todos los detalles tengan valores válidos
   for (const detail of data.details) {
     if (
       !detail.cantidad ||
@@ -187,7 +180,7 @@ export const validateInvoiceData = (data: InvoiceData): boolean => {
   return true
 }
 
-// Modificar la función sendInvoiceToSunat para mejorar el manejo de errores y agregar logs
+// Enviar factura a SUNAT
 export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: number): Promise<InvoiceSendResponse> => {
   const token = localStorage.getItem("token")
 
@@ -195,7 +188,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
     throw new Error("No se encontró token de autenticación")
   }
 
-  // Validar datos antes de enviar
   if (!validateInvoiceData(invoiceData)) {
     throw new Error(
       "Los datos de la factura contienen valores inválidos. Verifica que todos los precios y cantidades sean mayores a cero.",
@@ -212,7 +204,8 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: token.startsWith("Bearer ") ? token.replace("Bearer ", "") : token,
+        Accept: "application/json",
+        Authorization: getAuthHeader(token),
       },
       body: JSON.stringify(requestData),
     })
@@ -232,7 +225,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
           errorMessage = "Acceso denegado al servicio de facturación (403)."
         }
 
-        // Actualizar estado como fallido si tenemos ventaId
         if (ventaId) {
           try {
             await updateComprobanteStatus(ventaId, false)
@@ -247,7 +239,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
       try {
         const errorData = await response.json()
 
-        // Actualizar estado como fallido si tenemos ventaId
         if (ventaId) {
           try {
             await updateComprobanteStatus(ventaId, false)
@@ -258,7 +249,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
 
         throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`)
       } catch (jsonError) {
-        // Actualizar estado como fallido si tenemos ventaId
         if (ventaId) {
           try {
             await updateComprobanteStatus(ventaId, false)
@@ -273,7 +263,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
 
     const data = await response.json()
 
-    // Actualizar estado según el resultado de SUNAT si tenemos ventaId
     if (ventaId) {
       try {
         await updateComprobanteStatus(ventaId, data.sunatResponse?.success || false, data)
@@ -284,7 +273,6 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
 
     return data
   } catch (error: any) {
-    // Actualizar estado como fallido si tenemos ventaId
     if (ventaId) {
       try {
         await updateComprobanteStatus(ventaId, false)
@@ -294,17 +282,14 @@ export const sendInvoiceToSunat = async (invoiceData: InvoiceData, ventaId?: num
     }
 
     if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
-      throw new Error(
-        "No se pudo conectar al servicio de facturación. Verifique que el servicio esté activo y accesible.",
-      )
+      throw new Error("No se pudo conectar al servicio de facturación. Verifique que el servicio esté activo y accesible.")
     }
 
     throw error
   }
 }
 
-
-// Modificar la función getInvoicePdf para mejorar el manejo de errores
+// Obtener PDF de factura
 export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | string> => {
   const token = localStorage.getItem("token")
 
@@ -312,7 +297,6 @@ export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | st
     throw new Error("No se encontró token de autenticación")
   }
 
-  // Validar datos antes de enviar
   if (!validateInvoiceData(invoiceData)) {
     throw new Error(
       "Los datos de la factura contienen valores inválidos. Verifica que todos los precios y cantidades sean mayores a cero.",
@@ -320,10 +304,8 @@ export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | st
   }
 
   try {
-    // Añadir un parámetro para indicar que es una solicitud de un usuario de ventas
     const requestData = {
       ...invoiceData,
-      // Añadir un flag para indicar que podría ser un usuario de ventas
       is_sales_user: true,
     }
 
@@ -331,7 +313,8 @@ export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | st
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: token.startsWith("Bearer ") ? token.replace("Bearer ", "") : token,
+        Accept: "application/json",
+        Authorization: getAuthHeader(token),
       },
       body: JSON.stringify(requestData),
     })
@@ -339,14 +322,10 @@ export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | st
     if (!response.ok) {
       const contentType = response.headers.get("content-type") || ""
 
-      // Si la respuesta es HTML, extraer un mensaje más útil
       if (contentType.includes("text/html")) {
         const htmlText = await response.text()
-
-        // Intentar extraer un mensaje de error útil del HTML
         let errorMessage = "Error al obtener el PDF de la factura"
 
-        // Buscar mensajes de error comunes en el HTML
         if (htmlText.includes("404 Not Found")) {
           errorMessage = "Servicio de generación de PDF no encontrado (404). Verifique que el servicio esté activo."
         } else if (htmlText.includes("500 Internal Server Error")) {
@@ -354,61 +333,49 @@ export const getInvoicePdf = async (invoiceData: InvoiceData): Promise<Blob | st
         }
 
         throw new Error(errorMessage)
-      }      // Intentar parsear como JSON
+      }
+
       try {
         const errorData = await response.json()
         throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`)
       } catch (jsonError) {
-        // Si no es JSON, usar el status code
         throw new Error(`Error ${response.status}: ${response.statusText}`)
       }
-    }    // Verificar el tipo de contenido de la respuesta
+    }
+
     const contentType = response.headers.get("content-type")
 
     if (contentType && contentType.includes("application/pdf")) {
-      // Si es un PDF, devolvemos el blob
       return await response.blob()
     } else if (contentType && contentType.includes("application/json")) {
-      // Nueva lógica para manejar respuesta JSON con HTML dentro
       const jsonResponse = await response.json()
-      
+
       if (jsonResponse.success && jsonResponse.data && jsonResponse.data.html) {
         const htmlContent = jsonResponse.data.html
-        // Asegurarnos de que el HTML tenga los estilos necesarios para impresión térmica
         const enhancedHtml = enhanceTicketHtml(htmlContent)
         return enhancedHtml
       } else {
         throw new Error(jsonResponse.message || "Error al obtener el HTML de la factura")
       }
     } else if (contentType && contentType.includes("text/html")) {
-      // Si es HTML directo, devolvemos el texto HTML (mantener compatibilidad)
       const htmlContent = await response.text()
-
-      // Asegurarnos de que el HTML tenga los estilos necesarios para impresión térmica
       const enhancedHtml = enhanceTicketHtml(htmlContent)
       return enhancedHtml
     } else {
-      // Si no es ni PDF ni HTML ni JSON, intentamos leer como texto para depuración
       const text = await response.text()
       return text
     }
   } catch (error: any) {
-    // Verificar si el error es de red (CORS, conexión, etc.)
     if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
-      throw new Error(
-        "No se pudo conectar al servicio de generación de PDF. Verifique que el servicio esté activo y accesible.",
-      )
+      throw new Error("No se pudo conectar al servicio de generación de PDF. Verifique que el servicio esté activo y accesible.")
     }
-
     throw error
   }
 }
 
 // Función para mejorar el HTML del ticket para impresión térmica
 export const enhanceTicketHtml = (html: string): string => {
-  // Solo agregar estilos mínimos si no vienen del backend
   if (!html.includes("@page") && !html.includes("@media print")) {
-    // Solo estilos básicos para PDF de 80mm, sin interferir con el diseño del backend
     const styleTag = `
     <style>
       @page {
@@ -424,10 +391,8 @@ export const enhanceTicketHtml = (html: string): string => {
     </style>
     `
 
-    // Insertar los estilos en el HTML
     html = html.replace("</head>", `${styleTag}</head>`)
 
-    // Si no hay etiqueta head, agregarla
     if (!html.includes("<head>")) {
       html = `<!DOCTYPE html>
 <html>
@@ -444,52 +409,176 @@ ${html}
   return html
 }
 
-// Modificar la función prepareInvoiceData para incluir el descuento global
-// Buscar la función prepareInvoiceData y modificarla:
+// Agregar una función para verificar la disponibilidad del servicio de facturación
+export const checkFacturadorService = async (): Promise<boolean> => {
+  try {
+    const response = await fetch(`${FACTURADOR_API_URL}/health`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(5000),
+    })
 
-// Modificar la función prepareInvoiceData para incluir el descuento global
+    return response.ok
+  } catch (error) {
+    return false
+  }
+}
+
+// Nueva función para obtener el PDF del documento exacto enviado a SUNAT
+export const getInvoicePdfFromSunatResponse = async (
+  invoiceData: InvoiceData,
+  sunatResponse: InvoiceSendResponse,
+): Promise<Blob | string> => {
+  const token = localStorage.getItem("token")
+
+  if (!token) {
+    throw new Error("No se encontró token de autenticación")
+  }
+
+  try {
+    const requestData = {
+      ...invoiceData,
+      is_sales_user: true,
+      sunat_xml: sunatResponse.xml,
+      sunat_hash: sunatResponse.hash,
+      sunat_success: sunatResponse.sunatResponse.success,
+      sunat_cdr_description: sunatResponse.sunatResponse.cdrDescription,
+      use_sent_document: true,
+    }
+
+    const response = await fetch(`${FACTURADOR_API_URL}/invoices/pdf`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: getAuthHeader(token),
+      },
+      body: JSON.stringify(requestData),
+    })
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type") || ""
+
+      if (contentType.includes("text/html")) {
+        const htmlText = await response.text()
+        let errorMessage = "Error al obtener el PDF del documento enviado a SUNAT"
+
+        if (htmlText.includes("404 Not Found")) {
+          errorMessage = "Servicio de generación de PDF no encontrado (404). Verifique que el servicio esté activo."
+        } else if (htmlText.includes("500 Internal Server Error")) {
+          errorMessage = "Error interno en el servidor al generar PDF del documento enviado (500)."
+        }
+
+        throw new Error(errorMessage)
+      }
+
+      try {
+        const errorData = await response.json()
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`)
+      } catch (jsonError) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+    }
+
+    const contentType = response.headers.get("content-type")
+
+    if (contentType && contentType.includes("application/pdf")) {
+      return await response.blob()
+    } else if (contentType && contentType.includes("application/json")) {
+      const jsonResponse = await response.json()
+
+      if (jsonResponse.success && jsonResponse.data && jsonResponse.data.html) {
+        const htmlContent = jsonResponse.data.html
+        const enhancedHtml = enhanceTicketHtml(htmlContent)
+        return enhancedHtml
+      } else {
+        throw new Error(jsonResponse.message || "Error al obtener el HTML del documento enviado a SUNAT")
+      }
+    } else if (contentType && contentType.includes("text/html")) {
+      const htmlContent = await response.text()
+      const enhancedHtml = enhanceTicketHtml(htmlContent)
+      return enhancedHtml
+    } else {
+      const text = await response.text()
+      return text
+    }
+  } catch (error: any) {
+    if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
+      throw new Error(
+        "No se pudo conectar al servicio de generación de PDF del documento enviado. Verifique que el servicio esté activo y accesible.",
+      )
+    }
+
+    throw error
+  }
+}
+
+export const updateComprobanteStatus = async (ventaId: number, success: boolean, sunatData?: any): Promise<void> => {
+  const token = localStorage.getItem("token")
+
+  if (!token) {
+    throw new Error("No se encontró token de autenticación")
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/ventas/actualizar-comprobante/${ventaId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: getAuthHeader(token),
+      },
+      body: JSON.stringify({
+        comprobante_emitido: success,
+        sunat_data: sunatData || null,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error al actualizar estado del comprobante: ${response.statusText}`)
+    }
+  } catch (error) {
+    console.error("Error al actualizar estado del comprobante:", error)
+    throw error
+  }
+}
+
+// Función para preparar los datos de la factura
 export const prepareInvoiceData = (
   sale: any,
   company: any,
   tipoDocumento: string,
   cliente: ClienteConsultaResponse | null,
   series: { facturaActual: number; boletaActual: number },
-  nuevoCorrelativo?: number, // Nuevo parámetro opcional
+  nuevoCorrelativo?: number,
 ): InvoiceData => {
-  // Usar la fecha de la venta en lugar de la fecha actual
-  // La fecha puede venir en formato "2025-07-11 20:57:59", necesitamos convertirla a ISO
-  let fechaEmision = "";
+  let fechaEmision = ""
   try {
-    // Intentar parsear la fecha con diferentes formatos
-    let dateTime;
+    let dateTime
     if (sale.fecha.includes('T')) {
-      // Ya está en formato ISO
-      dateTime = DateTime.fromISO(sale.fecha);
+      dateTime = DateTime.fromISO(sale.fecha)
     } else {
-      // Formato "YYYY-MM-DD HH:mm:ss", reemplazar espacio con 'T'
-      const isoDateString = sale.fecha.replace(' ', 'T');
-      dateTime = DateTime.fromISO(isoDateString);
+      const isoDateString = sale.fecha.replace(' ', 'T')
+      dateTime = DateTime.fromISO(isoDateString)
     }
-    
+
     if (dateTime.isValid) {
-      fechaEmision = dateTime.setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? "";
+      fechaEmision = dateTime.setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? ""
     } else {
-      // Si falla, usar la fecha actual como fallback
-      console.warn('No se pudo parsear la fecha de la venta:', sale.fecha, 'usando fecha actual');
-      fechaEmision = DateTime.now().setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? "";
+      console.warn('No se pudo parsear la fecha de la venta:', sale.fecha, 'usando fecha actual')
+      fechaEmision = DateTime.now().setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? ""
     }
   } catch (error) {
-    console.error('Error al procesar fecha de venta:', error, 'fecha:', sale.fecha);
-    fechaEmision = DateTime.now().setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? "";
+    console.error('Error al procesar fecha de venta:', error, 'fecha:', sale.fecha)
+    fechaEmision = DateTime.now().setZone("America/Lima").toISO({ suppressMilliseconds: true }) ?? ""
   }
-  // Determinar serie y correlativo según tipo de documento
+
   let serie, correlativo
 
-  // Usar la serie de la venta si existe
   if (sale.serie) {
     serie = sale.serie
   } else {
-    // Si no tiene serie, usar el formato estándar
     if (tipoDocumento === "01") {
       serie = "F001"
     } else {
@@ -497,13 +586,11 @@ export const prepareInvoiceData = (
     }
   }
 
-  // Usar el correlativo de la venta si existe
   if (sale.correlativo) {
     correlativo = String(sale.correlativo).padStart(8, "0")
   } else if (nuevoCorrelativo) {
     correlativo = String(nuevoCorrelativo).padStart(8, "0")
   } else {
-    // Si no tiene correlativo, usar el valor por defecto
     if (tipoDocumento === "01") {
       correlativo = String(series.facturaActual).padStart(8, "0")
     } else {
@@ -511,19 +598,17 @@ export const prepareInvoiceData = (
     }
   }
 
-  // Preparar detalles de productos
   const details = sale.items.map((item: any) => {
-    // Asegurar que los valores sean números válidos mayores que cero
     const precioUnitario = Math.max(0.01, Number.parseFloat(item.precio_unitario_con_igv) || 0.01)
     const cantidad = Math.max(0.01, item.cantidad || 0.01)
-    const valorUnitario = Math.max(0.01, precioUnitario / 1.18) // Valor sin IGV
+    const valorUnitario = Math.max(0.01, precioUnitario / 1.18)
     const valorVenta = Math.max(0.01, valorUnitario * cantidad)
     const igv = Math.max(0.01, valorVenta * 0.18)
 
     return {
-      tipAfeIgv: 10, // Gravado - Operación Onerosa
+      tipAfeIgv: 10,
       codProducto: item.producto_id.toString(),
-      unidad: "NIU", // Unidad (pieza)
+      unidad: "NIU",
       descripcion: item.nombre || "Producto",
       cantidad: Number(cantidad.toFixed(2)),
       mtoValorUnitario: Number(valorUnitario.toFixed(2)),
@@ -536,45 +621,37 @@ export const prepareInvoiceData = (
     }
   })
 
-  // Datos del cliente según tipo de documento
   const clientData = {
-    tipoDoc: tipoDocumento === "01" ? "6" : "1", // 6 para RUC, 1 para DNI
+    tipoDoc: tipoDocumento === "01" ? "6" : "1",
     numDoc: 0,
     rznSocial: "CLIENTE GENERAL",
   }
 
-  // Priorizar los datos de cliente de la venta
   if (sale.cliente_numero_documento && sale.cliente_nombre) {
     clientData.numDoc = Number(sale.cliente_numero_documento)
     clientData.rznSocial = sale.cliente_nombre
     clientData.tipoDoc = sale.cliente_tipo_documento || (tipoDocumento === "01" ? "6" : "1")
   } else if (cliente) {
-    // Si no hay datos en la venta, usar los datos del objeto cliente
     clientData.numDoc = Number(cliente.numeroDocumento)
-
     if (tipoDocumento === "01") {
-      // Factura
       clientData.rznSocial = cliente.razonSocial || "CLIENTE GENERAL"
     } else {
-      // Boleta
-      // Para boleta, concatenamos nombres y apellidos
       clientData.rznSocial =
         cliente.nombre ||
         `${cliente.apellidoPaterno || ""} ${cliente.apellidoMaterno || ""} ${cliente.nombres || ""}`.trim()
     }
   }
 
-  // Construir objeto de factura
   const invoiceData: InvoiceData = {
     ublVersion: "2.1",
-    tipoDoc: tipoDocumento, // "01" Factura o "03" Boleta
-    tipoOperacion: "0101", // Venta interna
+    tipoDoc: tipoDocumento,
+    tipoOperacion: "0101",
     serie,
     correlativo,
     fechaEmision,
     formaPago: {
       moneda: "PEN",
-      tipo: "Contado", // Podría ser configurable
+      tipo: "Contado",
     },
     tipoMoneda: "PEN",
     company: {
@@ -582,10 +659,10 @@ export const prepareInvoiceData = (
       razonSocial: company.razon_social || "EMPRESA",
       nombreComercial: company.razon_social || "EMPRESA",
       address: {
-        ubigueo: "150101", // Podría ser configurable
-        departamento: "AREQUIPA", // Podría ser configurable
-        provincia: "AREQUIPA", // Podría ser configurable
-        distrito: "AREQUIPA", // Podría ser configurable
+        ubigueo: "150101",
+        departamento: "AREQUIPA",
+        provincia: "AREQUIPA",
+        distrito: "AREQUIPA",
         urbanizacion: "-",
         direccion: company.direccion || "DIRECCIÓN NO ESPECIFICADA",
         codLocal: "0000",
@@ -593,34 +670,26 @@ export const prepareInvoiceData = (
     },
     client: clientData,
     details,
-    // Guardar las series actuales
     serieFactura: "F001",
     correlativoFactura: series.facturaActual,
     serieBoleta: "B001",
-    correlativoBoleta: series.boletaActual,  }
-  
-  // Añadir descuento global si existe en la venta
-  // Verificar múltiples formas en que puede venir el descuento
+    correlativoBoleta: series.boletaActual,
+  }
+
   if (sale.es_descuento && sale.descuento) {
-    // El monto de descuento en la venta es con IGV; convertir a base (pre-IGV) para SUNAT
     invoiceData.descuentoGlobal = Number(((Number(sale.descuento) || 0) / 1.18).toFixed(2))
   } else if (sale.descuento && Number(sale.descuento) > 0) {
-    // Descuento directo sin flag es_descuento (monto con IGV) -> convertir a base
     invoiceData.descuentoGlobal = Number(((Number(sale.descuento) || 0) / 1.18).toFixed(2))
   }
 
-  // Si se proporciona un descuento global directamente, usarlo
   if (sale.descuentoGlobal) {
-    // Si llega un descuentoGlobal ya con IGV, convertir a base; si ya es base, idealmente vendría marcado, pero mantenemos consistencia
     invoiceData.descuentoGlobal = Number(((Number(sale.descuentoGlobal) || 0) / 1.18).toFixed(2))
   }
 
   return invoiceData
 }
 
-// Añadir la función getLastCorrelativo al final del archivo
-
-// Modificar la función getLastCorrelativo para convertir el formato del tipo de documento
+// Función para obtener el último correlativo
 export const getLastCorrelativo = async (tipoDocumento: string): Promise<number> => {
   try {
     const token = localStorage.getItem("token")
@@ -628,73 +697,61 @@ export const getLastCorrelativo = async (tipoDocumento: string): Promise<number>
       throw new Error("No hay token de autenticación")
     }
 
-    // Convertir el formato del tipo de documento de "01"/"03" a "1"/"3" que espera el backend
     const tipoDocBackend = tipoDocumento === "01" ? "1" : "3"
 
     const response = await fetch(`${API_URL}/ventas/ultimo-correlativo/${tipoDocBackend}`, {
       method: "GET",
       headers: {
-        Authorization: token.startsWith("Bearer ") ? token.replace("Bearer ", "") : token,
+        Authorization: getAuthHeader(token),
         "Content-Type": "application/json",
       },
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(errorData.message || "Error al obtener el último correlativo")    }
+      throw new Error(errorData.message || "Error al obtener el último correlativo")
+    }
 
     const data = await response.json()
     return data.correlativo
   } catch (error) {
-    return 0 // Valor por defecto en caso de error
+    return 0
   }
 }
 
 // Función para detectar dispositivos móviles o con poca memoria
 export const isMobileOrLowEndDevice = (): boolean => {
-  // Detectar dispositivos móviles
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  
-  // Detectar dispositivos con poca memoria RAM (si está disponible)
   const hasLowMemory = (navigator as any).deviceMemory && (navigator as any).deviceMemory < 4
-  
-  // Detectar conexión lenta
-  const hasSlowConnection = (navigator as any).connection && 
-    ((navigator as any).connection.effectiveType === 'slow-2g' || 
+  const hasSlowConnection = (navigator as any).connection &&
+    ((navigator as any).connection.effectiveType === 'slow-2g' ||
      (navigator as any).connection.effectiveType === '2g' ||
      (navigator as any).connection.effectiveType === '3g')
-  
+
   return isMobile || hasLowMemory || hasSlowConnection
 }
 
 // Función para limpiar la caché y liberar memoria
 export const clearMemoryCache = (): void => {
   try {
-    // Forzar garbage collection si está disponible
     if ((window as any).gc) {
       (window as any).gc()
     }
-    
-    // Limpiar canvas temporales si existen
     const canvases = document.querySelectorAll('canvas[data-temp="true"]')
     canvases.forEach(canvas => canvas.remove())
-    
   } catch (error) {
     console.warn('No se pudo limpiar la caché de memoria:', error)
   }
 }
 
-// Función optimizada para convertir HTML a PDF con soporte para dispositivos móviles
-
-// Función simplificada y robusta para convertir HTML a PDF
+// Función para convertir HTML a PDF
 export const convertHtmlToPdf = async (htmlContent: string): Promise<Blob> => {
   try {
     console.log('🔄 Iniciando conversión HTML a PDF...')
     clearMemoryCache()
 
-    const timeoutMs = 60000 // 60 segundos
+    const timeoutMs = 60000
 
-    // Crear una promesa sin async en el executor para cumplir no-async-promise-executor
     const conversionPromise = new Promise<Blob>((resolve, reject) => {
       (async () => {
         try {
@@ -804,209 +861,52 @@ export const convertHtmlToPdf = async (htmlContent: string): Promise<Blob> => {
   }
 }
 
-// Función de fallback para generar PDF simple sin html2canvas
+// Función de fallback para generar PDF simple
 export const generateSimplePdf = async (htmlContent: string): Promise<Blob> => {
   try {
     console.log('🔄 Generando PDF simple como fallback...')
-    
+
     const { jsPDF } = await import("jspdf")
-    
-    // Crear un PDF simple con el contenido HTML como texto
+
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
-      format: [76, 200], // Tamaño fijo para ticket
+      format: [76, 200],
       compress: true
     })
-    
-    // Agregar el contenido HTML como texto simple
+
     const textContent = htmlContent
-      .replace(/<[^>]*>/g, '') // Remover tags HTML
-      .replace(/&nbsp;/g, ' ') // Reemplazar espacios no rompibles
-      .replace(/&amp;/g, '&') // Reemplazar entidades HTML
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .trim()
-    
-    // Dividir el texto en líneas
+
     const lines = textContent.split('\n').filter(line => line.trim())
-    
-    // Agregar cada línea al PDF
+
     let yPosition = 10
     const lineHeight = 5
     const maxWidth = 70
-    
+
     lines.forEach(line => {
       if (yPosition > 190) {
         pdf.addPage()
         yPosition = 10
       }
-      
-      // Dividir líneas largas
+
       const wrappedLines = pdf.splitTextToSize(line, maxWidth)
       wrappedLines.forEach((wrappedLine: string) => {
         pdf.text(wrappedLine, 3, yPosition)
         yPosition += lineHeight
       })
     })
-    
+
     console.log('✅ PDF simple generado correctamente')
     return pdf.output("blob")
-    
+
   } catch (error) {
     console.error('❌ Error en PDF simple:', error)
     throw new Error("No se pudo generar PDF simple: " + ((error as Error).message || "Error desconocido"))
-  }
-}
-
-// Agregar una función para verificar la disponibilidad del servicio de facturación
-export const checkFacturadorService = async (): Promise<boolean> => {  try {
-    const response = await fetch(`${FACTURADOR_API_URL}/health`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      // Timeout de 5 segundos
-      signal: AbortSignal.timeout(5000),
-    })
-
-    return response.ok
-  } catch (error) {
-    return false
-  }
-}
-
-// Nueva función para obtener el PDF del documento exacto enviado a SUNAT
-export const getInvoicePdfFromSunatResponse = async (
-  invoiceData: InvoiceData, 
-  sunatResponse: InvoiceSendResponse
-): Promise<Blob | string> => {
-  const token = localStorage.getItem("token")
-
-  if (!token) {
-    throw new Error("No se encontró token de autenticación")
-  }
-
-  try {
-    // Enviar los datos originales junto con la respuesta de SUNAT para garantizar consistencia
-    const requestData = {
-      ...invoiceData,
-      is_sales_user: true,
-      // Datos del documento ya enviado a SUNAT para garantizar consistencia
-      sunat_xml: sunatResponse.xml,
-      sunat_hash: sunatResponse.hash,
-      sunat_success: sunatResponse.sunatResponse.success,
-      sunat_cdr_description: sunatResponse.sunatResponse.cdrDescription,
-      // Flag para indicar que queremos el PDF del documento ya enviado
-      use_sent_document: true
-    }
-
-    const response = await fetch(`${FACTURADOR_API_URL}/invoices/pdf`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token.startsWith("Bearer ") ? token.replace("Bearer ", "") : token,
-      },
-      body: JSON.stringify(requestData),
-    })
-
-    if (!response.ok) {
-      const contentType = response.headers.get("content-type") || ""
-
-      // Si la respuesta es HTML, extraer un mensaje más útil
-      if (contentType.includes("text/html")) {
-        const htmlText = await response.text()
-
-        // Intentar extraer un mensaje de error útil del HTML
-        let errorMessage = "Error al obtener el PDF del documento enviado a SUNAT"
-
-        // Buscar mensajes de error comunes en el HTML
-        if (htmlText.includes("404 Not Found")) {
-          errorMessage = "Servicio de generación de PDF no encontrado (404). Verifique que el servicio esté activo."
-        } else if (htmlText.includes("500 Internal Server Error")) {
-          errorMessage = "Error interno en el servidor al generar PDF del documento enviado (500)."
-        }
-
-        throw new Error(errorMessage)
-      }
-
-      // Intentar parsear como JSON
-      try {
-        const errorData = await response.json()
-        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`)
-      } catch (jsonError) {
-        // Si no es JSON, usar el status code
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-    }
-
-    // Verificar el tipo de contenido de la respuesta
-    const contentType = response.headers.get("content-type")
-
-    if (contentType && contentType.includes("application/pdf")) {
-      // Si es un PDF, devolvemos el blob
-      return await response.blob()
-    } else if (contentType && contentType.includes("application/json")) {
-      // Nueva lógica para manejar respuesta JSON con HTML dentro
-      const jsonResponse = await response.json()
-      
-      if (jsonResponse.success && jsonResponse.data && jsonResponse.data.html) {
-        const htmlContent = jsonResponse.data.html
-        // Asegurarnos de que el HTML tenga los estilos necesarios para impresión térmica
-        const enhancedHtml = enhanceTicketHtml(htmlContent)
-        return enhancedHtml
-      } else {
-        throw new Error(jsonResponse.message || "Error al obtener el HTML del documento enviado a SUNAT")
-      }
-    } else if (contentType && contentType.includes("text/html")) {
-      // Si es HTML directo, devolvemos el texto HTML (mantener compatibilidad)
-      const htmlContent = await response.text()
-
-      // Asegurarnos de que el HTML tenga los estilos necesarios para impresión térmica
-      const enhancedHtml = enhanceTicketHtml(htmlContent)
-      return enhancedHtml
-    } else {
-      // Si no es ni PDF ni HTML ni JSON, intentamos leer como texto para depuración
-      const text = await response.text()
-      return text
-    }
-  } catch (error: any) {
-    // Verificar si el error es de red (CORS, conexión, etc.)
-    if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
-      throw new Error(
-        "No se pudo conectar al servicio de generación de PDF del documento enviado. Verifique que el servicio esté activo y accesible.",
-      )
-    }
-
-    throw error
-  }
-}
-
-export const updateComprobanteStatus = async (ventaId: number, success: boolean, sunatData?: any): Promise<void> => {
-  const token = localStorage.getItem("token")
-
-  if (!token) {
-    throw new Error("No se encontró token de autenticación")
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/ventas/actualizar-comprobante/${ventaId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        comprobante_emitido: success,
-        sunat_data: sunatData || null,
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Error al actualizar estado del comprobante: ${response.statusText}`)
-    }
-  } catch (error) {
-    console.error("Error al actualizar estado del comprobante:", error)
-    throw error
   }
 }

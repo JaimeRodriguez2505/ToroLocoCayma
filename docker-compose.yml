@@ -1,7 +1,7 @@
 services:
   # Base de datos para el ERP Backend (Node.js)
   db-erp:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: toroloco-db-erp
     restart: always
     environment:
@@ -34,7 +34,7 @@ services:
 
   # Base de datos para Factura (Laravel)
   db-factura:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: toroloco-db-factura
     restart: always
     environment:
@@ -177,6 +177,7 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: production
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-https://api.torolococayma.com}
     container_name: toroloco-landing
     restart: always
     environment:
@@ -306,7 +307,7 @@ services:
           cpus: '0.25'
           memory: 256M
 
-  # Gateway Nginx (opcional - para reverse proxy)
+  # Gateway Nginx (Reverse Proxy con SSL)
   nginx-gateway:
     image: nginx:alpine
     container_name: toroloco-gateway
@@ -316,7 +317,8 @@ services:
       - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - ./docker/certbot/conf:/etc/nginx/ssl:ro
+      - ./docker/certbot/www:/var/www/certbot:ro
       - gateway_logs:/var/log/nginx
     networks:
       - toroloco-net
@@ -335,6 +337,17 @@ services:
         limits:
           cpus: '0.5'
           memory: 256M
+
+  # Certbot para renovación automática de certificados SSL
+  certbot:
+    image: certbot/certbot:latest
+    container_name: toroloco-certbot
+    volumes:
+      - ./docker/certbot/conf:/etc/letsencrypt
+      - ./docker/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - toroloco-net
 
 volumes:
   db_erp_data:

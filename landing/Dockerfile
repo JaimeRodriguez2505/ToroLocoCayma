@@ -18,6 +18,10 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+# Build-time environment variables for Next.js
+ARG NEXT_PUBLIC_BACKEND_URL=https://api.torolococayma.com
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
 # Build the application
 RUN npm run build
 

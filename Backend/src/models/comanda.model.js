@@ -107,6 +107,11 @@ const Comanda = sequelize.define('Comanda', {
     type: DataTypes.DATE,
     allowNull: true,
     comment: 'Fecha de expiración para comandas delivery'
+  },
+  venta_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'ID de la venta asociada (para comandas delivery)'
   }
 }, {
   tableName: 'comandas',

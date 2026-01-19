@@ -37,6 +37,13 @@ connectDB()
 // Middlewares
 app.use(cors({
   origin: [
+    // Producción - ToroLocoCayma con SSL
+    'https://torolococayma.com',
+    'https://www.torolococayma.com',
+    'https://app.torolococayma.com',
+    'https://api.torolococayma.com',
+    'https://factura.torolococayma.com',
+    // Desarrollo local
     'http://localhost:4242',      // Frontend (React ERP)
     'http://localhost:4243',      // Landing (Next.js)
     'http://localhost:4244',      // Factura
@@ -45,9 +52,9 @@ app.use(cors({
     'http://127.0.0.1:4244',
     'http://localhost:5173',      // Frontend dev
     'http://127.0.0.1:5173',
-    'http://127.0.0.1:3033',
-    'http://localhost:3033',
-
+    'http://161.132.4.27:4242',
+    'http://161.132.4.27:4243',
+    'http://161.132.4.27:4244',
   ],
   credentials: true
 }))

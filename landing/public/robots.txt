@@ -1,0 +1,10 @@
+# Robots.txt para Toro Loco Cayma
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://torolococayma.com/sitemap.xml
+
+# Bloquear rutas internas
+Disallow: /api/
+Disallow: /_next/

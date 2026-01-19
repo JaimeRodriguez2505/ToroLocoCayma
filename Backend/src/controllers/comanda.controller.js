@@ -451,10 +451,10 @@ const comandaController = {
   },
 
   // MEJORA: Crear comanda delivery automática para ventas sin mesa
-  crearComandaDeliveryAutomatica: async (productos, id_usuario, observaciones = '') => {
+  crearComandaDeliveryAutomatica: async (productos, id_usuario, observaciones = '', venta_id = null) => {
     try {
       const numero_carrito = await getNextDeliveryNumber();
-      
+
       // Calcular totales
       let total = 0;
       let totalConIgv = 0;
@@ -480,7 +480,8 @@ const comandaController = {
         fecha_creacion: new Date(),
         fecha_actualizacion: new Date(),
         es_delivery: true,
-        fecha_expiracion: fechaExpiracion
+        fecha_expiracion: fechaExpiracion,
+        venta_id: venta_id
       });
 
       console.log(`✅ Comanda delivery ${comandaDelivery.comanda_id} creada automáticamente (expira: ${fechaExpiracion})`);

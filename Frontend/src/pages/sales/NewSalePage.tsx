@@ -184,7 +184,7 @@ const NewSalePage = () => {
 
   // Estados para códigos de barras
   const [isBarcodeDialogOpen, setIsBarcodeDialogOpen] = useState(false)
-  const [isDigitalMenuMode, setIsDigitalMenuMode] = useState(true) // Default to Digital Menu for better UX
+  const [isDigitalMenuMode, setIsDigitalMenuMode] = useState(false) // Carta digital desactivada por defecto
   
   // Estados para la versión móvil (comentados hasta implementación completa)
   // const [isMobileProductSearchOpen, setIsMobileProductSearchOpen] = useState(false)

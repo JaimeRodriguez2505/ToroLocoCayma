@@ -141,7 +141,7 @@ const CompanyPage = () => {
           setLogoPreview(company.logo_url)
         } else {
           // Es una ruta de archivo local, extraer solo el nombre del archivo
-          const baseUrl = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "http://localhost:4240").replace(/\/$/, "");
+          const baseUrl = (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "https://api.torolococayma.com").replace(/\/$/, "");
           // Extraer solo el nombre del archivo de la ruta completa
           const fileName = company.logo_url.split("\\").pop()?.split("/").pop()
           

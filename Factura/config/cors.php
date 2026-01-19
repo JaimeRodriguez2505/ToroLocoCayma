@@ -20,9 +20,13 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://tiktrendy.juliettebella.com',
-        'https://factura.juliettebella.com',
-        'https://juliettebella.com',
+        // Producción - ToroLocoCayma
+        'https://torolococayma.com',
+        'https://www.torolococayma.com',
+        'https://app.torolococayma.com',
+        'https://api.torolococayma.com',
+        'https://factura.torolococayma.com',
+        // Desarrollo local
         'http://localhost:4242',
         'http://localhost:4243',
         'http://localhost:4244',
@@ -30,6 +34,10 @@ return [
         'http://127.0.0.1:4243',
         'http://127.0.0.1:4244',
         'http://localhost:5173',
+        'http://161.132.4.27:4242',
+        'http://161.132.4.27:4243',
+        'http://161.132.4.27:4244',
+        'http://161.132.4.27',
     ],
 
     'allowed_origins_patterns' => [
